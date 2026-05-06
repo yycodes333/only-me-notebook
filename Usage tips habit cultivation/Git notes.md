@@ -93,9 +93,27 @@ git config --list
 
 ## Git 实现笔记记录
 
-### 1. 创建版本库
+### 1. 创建版本库与工作区
+
+工作区（Working Directory）指的就是你在电脑里能看到的目录，比如我的`notebook`文件夹就是一个工作区：
+
+![git6](image/git6.png)
 
 什么是版本库呢？版本库又名仓库（Repository），你可以简单理解成一个目录，这个目录里面的所有文件都可以被Git管理起来，每个文件的修改、删除，Git都能跟踪，以便任何时刻都可以追踪历史，或者在将来某个时刻可以“还原”。
+
+版本库（Repository）工作区有一个隐藏目录`.git`，这个不算工作区，而是Git的版本库。
+
+Git的版本库里存了很多东西，其中最重要的就是称为stage（或者叫index）的暂存区，还有Git为我们自动创建的第一个分支`master`，以及指向`master`的一个指针叫`HEAD`。
+
+![git7](image/git7.png)
+
+第一步是用`git add`把文件添加进去，实际上就是把文件修改添加到暂存区；
+
+第二步是用`git commit`提交更改，实际上就是把暂存区的所有内容提交到当前分支。
+
+因为我们创建Git版本库时，Git自动为我们创建了唯一一个`master`分支，所以，现在，`git commit`就是往`master`分支上提交更改。
+
+你可以简单理解为，需要提交的文件修改通通放到暂存区，然后，一次性提交暂存区的所有修改。
 
 那么我们如何创建版本库呢？这也就是接下来我们要讲到的 **git init**这个命令工具了。
 
@@ -123,7 +141,7 @@ ls -a
 
 ### 2. Git 常用命令介绍
 
-#### 1. git statue & git diff
+#### 1. 查看修改状态及内容
 
 `git status`命令可以让我们时刻掌握仓库当前的状态，但不能看具体修改了的内容，而`git diff`这个命令可以帮我们查看具体修改的内容。
 
@@ -311,4 +329,189 @@ Changes not staged for commit:
 
 
 
-#### 2. git log
+#### 2. 查看历史记录
+
+实际工作中，我们脑子里怎么可能记得一个几千行的文件每次都改了什么内容，不然要版本控制系统干什么。版本控制系统肯定有某个命令可以告诉我们历史记录，在Git中，我们用`git log`命令查看。
+
+`git log`命令显示从**最近到最远**的提交日志。
+
+当进入 `git log`，与 `git diff`类似的 操作使用如下
+
+| 按键      | 作用           |
+| --------- | -------------- |
+| `q`       | 退出           |
+| `空格`    | 向下翻一页     |
+| `b`       | 向上翻一页     |
+| `回车`    | 向下滚动一行   |
+| `↑` / `↓` | 上下移动       |
+| `/关键词` | 搜索关键词     |
+| `n`       | 下一个搜索结果 |
+| `N`       | 上一个搜索结果 |
+
+`git log `参数如下
+
+| 参数         | 作用               |
+| ------------ | ------------------ |
+| `--oneline`  | 每个提交显示一行   |
+| `--graph`    | 显示分支图         |
+| `--decorate` | 显示分支名、标签名 |
+| `--all`      | 显示所有分支       |
+
+一般我们使用 `git oneline`，相当于 `git log`的简介版本
+
+##### 情景一
+
+查看当前仓库的历史，并对比-`git log`和 `git log --oneline`
+
+```shell
+使用 git log
+Author: yy <2033170479@qq.com>
+Date:   Wed May 6 19:04:35 2026 +0800
+
+    更新Git笔记
+----------------------------------------------------
+使用 git log --oneline
+d13d5c4 更新Git笔记
+```
+
+##### 情景二
+
+若想看到具体某个文件的历史
+
+`git log --oneline <文件名> `   
+
+**注意**：--oneline一定要在文件名前面！
+
+```shell
+(base) yy@yy-VivoBook-ASUSLaptop-X512FLC-V5000FL:~/My_Data/notebook$ git log --oneline Outline.md
+d1765b1 解决中文乱码问题
+```
+
+##### 情景三
+
+若想看到每次提交具体修改了什么内容
+
+`git log --oneline -p <文件名> `
+
+```shell
+git log --oneline  -p README.md
+a279bf3 测试不用管
+diff --git a/README.md b/README.md
+index cd47a99..265a378 100644
+--- a/README.md
++++ b/README.md
+@@ -6,7 +6,5 @@
+
+-我要在这里作出修改。
+-
+-
++这里作出修改
+ 
+
+```
+
+##### 情境四
+
+若想查看最近几个,我们以三个举例子。
+
+`git log --oneline -3 `
+
+```shell
+(base) yy@yy-VivoBook-ASUSLaptop-X512FLC-V5000FL:~/My_Data/notebook$ git log --oneline -3
+3d3586a (HEAD -> main, origin/main) 更新Git笔记
+d13d5c4 更新Git笔记
+8af8375 更新部分Git教学
+```
+
+当然对于文件同理
+
+`git log --oneline -3 <文件名>`
+
+```shell
+(base) yy@yy-VivoBook-ASUSLaptop-X512FLC-V5000FL:~/My_Data/notebook$ git log --oneline -3 README.md
+ccbc4d0 测试
+a279bf3 测试不用管
+6438a58 解决中文乱码
+```
+
+##### 情境五
+
+对于 `git log`查看的当前分支的历史， 若想看到所有分支的历史
+
+`git log --all`
+
+执行git `log -all --oneline`后显示如下
+
+![git5](image/git5.png)
+
+#### 3.追溯历史版本
+
+
+
+
+
+
+
+
+
+### 3. 关联Github仓库
+
+现在的情景是，你已经在本地创建了一个Git仓库后，又想在GitHub创建一个Git仓库，并且让这两个仓库进行远程同步，这样，GitHub上的仓库既可以作为备份，又可以让其他人通过该仓库来协作，真是一举多得。
+
+首先，登陆GitHub，然后，在右上角找到“Create a new repo”按钮，创建一个新的仓库,在Repository name填入`你的仓库名词`，这里我叫做`notebooktemp`其他保持默认设置，点击“Create repository”按钮，就成功地创建了一个新的Git仓库：
+
+目前，在GitHub上的这个``仓库还是空的，GitHub告诉我们，可以从这个仓库克隆出新的仓库，也可以把一个已有的本地仓库与之关联，然后，把本地仓库的内容推送到GitHub仓库。
+
+现在，我们根据GitHub的提示，在本地的`notebook`仓库下运行命令：
+
+```shell
+git remote add origin git@github.com:yycodes333/notebooktemp.git
+git branch -M main
+git add .
+git commit -m "第一次提交内容"
+git push -u origin main
+```
+
+*(注：git branch -M main将git init时候默认分支修改为main)*
+
+最后输出以下内容说明你关联仓库成功！
+
+```shell
+(base) yy@yy-VivoBook-ASUSLaptop-X512FLC-V5000FL:~/My_Data/temp$ git push -u origin main
+Enumerating objects: 154, done.
+Counting objects: 100% (154/154), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (154/154), done.
+Writing objects: 100% (154/154), 23.17 MiB | 2.60 MiB/s, done.
+Total 154 (delta 1), reused 0 (delta 0), pack-reused 0
+remote: Resolving deltas: 100% (1/1), done.
+To github.com:yycodes333/notebooktemp.git
+ * [new branch]      main -> main
+Branch 'main' set up to track remote branch 'main' from 'origin'.
+
+```
+
+把本地库的内容推送到远程，用`git push`命令，实际上是把当前分支`master`推送到远程。
+
+由于远程库是空的，我们**第一次推送`master`分支时，必须加上了`-u`参数**，Git不但会把本地的`master`分支内容推送的远程新的`master`分支，还会把本地的`master`分支和远程的`master`分支关联起来，在以后的推送或者拉取时就可以简化命令，使用`git push origin main(因为这里-M main已经将master改名为main)`即可。
+
+加入后续单独开启新的分支，比如分支dev
+
+```shell
+git checkout -b dev
+```
+
+*(注：这条命令相当于 `git branch dev` 和 `git checkout dev` 两条命令的结合。现在你已经离开了 `main` 分支，站在了 `dev` 分支上。)*
+
+然后想要将内容（此内容与第一回的main分支区分开可以另建一个本地工作间上传）推送到dev分支上，进行如下操作。
+
+```shell
+git add .
+git commit -m "在 dev 分支上的第一次提交"
+git push -u origin dev#由于是在该分支第一次操作一定要➕u
+```
+
+同理，当后续在这个分支操作时候就可以简写成git push 或者 git push origin dev了。
+
+
+
