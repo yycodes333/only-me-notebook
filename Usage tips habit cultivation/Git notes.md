@@ -123,7 +123,7 @@ ls -a
 
 ### 2. Git 常用命令介绍
 
-### 1. git statue & git diff
+#### 1. git statue & git diff
 
 `git status`命令可以让我们时刻掌握仓库当前的状态，但不能看具体修改了的内容，而`git diff`这个命令可以帮我们查看具体修改的内容。
 
@@ -141,7 +141,7 @@ nothing to commit, working tree clean
 
 接着，我们展示如果作出修改这两个命令的作用。
 
-#### 新增内容体现
+##### 新增内容体现
 
 如果原来我的README.md内容如下：
 
@@ -210,7 +210,7 @@ yy@yy-VivoBook-ASUSLaptop-X512FLC
 
 
 
-#### 删除内容体现
+##### 删除内容体现
 
 如果原来我的README.md内容如下：
 
@@ -248,7 +248,9 @@ yy@yy-VivoBook-ASUSLaptop-X512FLC
 
 
 
-#### 补充git diff内容查阅操作
+##### 补充
+
+**git diff内容查阅操作**
 
 | `q`       | 退出               |
 | --------- | ------------------ |
@@ -259,3 +261,54 @@ yy@yy-VivoBook-ASUSLaptop-X512FLC
 | `/关键词` | 搜索关键词         |
 | `n`       | 跳到下一个搜索结果 |
 | `N`       | 跳到上一个搜索结果 |
+
+**git status 简介版命令**
+
+当我们查阅状态时候发现，内容太多太乱，有很多我们压根儿就不想看的内容出现，我们就像看到是什么文件被修改了以及修改类型我们可以使用 `git status -s`，这个命令只会输出修改文件以及文件修改类型。其中`s`是`short`简称
+
+例如，以下是 `git status`输出
+
+```shell
+yy@yy-VivoBook-ASUSLaptop-X512FLC-V5000FL:~/My_Data/notebook$ git status
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   Usage tips habit cultivation/Git notes.md
+```
+
+如果使用`git status -s`输出如下
+
+```shell
+ M "Usage tips habit cultivation/Git notes.md"
+```
+
+这就非常简介了，注意到构成结构是 **修改类型+文件**
+
+修改类型如下
+
+| 标记 | 含义                 |
+| ---- | -------------------- |
+| `??` | 新文件，未追踪       |
+| `M`  | 文件被修改           |
+| `A`  | 新文件，已加入暂存区 |
+| `D`  | 文件被删除           |
+| `R`  | 文件被重命名         |
+
+注意到，在修改后没有放到暂存区时候即没有执行 `git add`，是红色的M，执行 `git add`后变成绿色的M
+
+![git2](image/git2.png)
+
+并且在这里也说明 `??`和 `A`关系如下，新添加内容，如果没有进入暂存区显示 `？？`，加入暂存区显示 `A`
+
+![git4png](image/git4png.png)
+
+如果我将 README.md(copy)删除后，如下显示，可见有顺序，先添加后删除，这里表示为为 `A D`。
+
+![git3](/home/yy/My_Data/notebook/Usage tips habit cultivation/image/git3.png)
+
+
+
+#### 2. git log
