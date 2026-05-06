@@ -307,7 +307,7 @@ Changes not staged for commit:
 
 如果我将 README.md(copy)删除后，如下显示，可见有顺序，先添加后删除，这里表示为为 `A D`。
 
-![git3](/home/yy/My_Data/notebook/Usage tips habit cultivation/image/git3.png)
+![git3](image/git3.png)
 
 
 
