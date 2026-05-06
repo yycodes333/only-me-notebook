@@ -1,5 +1,13 @@
 # Git 使用教程
 
+```
+学习资源：
+		https://hackmd.io/@GDSC-CYCU/Linux-Git-WorkShop
+		https://liaoxuefeng.com/books/git/branch/collaboration/index.html
+```
+
+
+
 ## 简介
 
 Git 是一个开源的分布式版本控制系统，用于敏捷高效地处理任何或小或大的项目。Git 是 Linus Torvalds 为了帮助管理 Linux 内核开发而开发的一个开放源码的版本控制软件。
@@ -458,7 +466,50 @@ a279bf3 测试不用管
 
 现在的情景是，你已经在本地创建了一个Git仓库后，又想在GitHub创建一个Git仓库，并且让这两个仓库进行远程同步，这样，GitHub上的仓库既可以作为备份，又可以让其他人通过该仓库来协作，真是一举多得。
 
-首先，登陆GitHub，然后，在右上角找到“Create a new repo”按钮，创建一个新的仓库,在Repository name填入`你的仓库名词`，这里我叫做`notebooktemp`其他保持默认设置，点击“Create repository”按钮，就成功地创建了一个新的Git仓库：
+首先，我们需要创建SSH Key公钥，在你的终端输入 `ssh-keygen`
+
+接着，终端机会问你几个问题，**全部直接按** `Enter` 接受默认值即可。
+
+- `Enter file in which to save the key...`：直接按 `Enter`。
+- `Enter passphrase...`：直接按 `Enter` (不需要密码)。
+- `Enter same passphrase again...`：再次按 `Enter`。
+
+指令完成后，画面上会告诉你公钥存储的路径，例如 `/home/你的用户名/.ssh/id_rsa.pub` 或 `id_ed25519.pub`
+
+钥匙有分公钥 (可以给别人) 和私钥 (绝对要自己保管好)。我们要将“公钥”复制到 GitHub。
+
+在终端机输入以下指令来显示公钥内容。请注意，文件名可能是 `id_rsa.pub` 或 `id_ed25519.pub`，这取决于系统默认值，两个都可以。
+
+```shell
+cat ~/.ssh/id_rsa.pub
+```
+
+**完整复制**画面上出现的所有内容，它应该是以 `ssh-rsa` 或 `ssh-ed25519` 开头。
+
+前往 GitHub 网站，登录你的账号。
+
+点击右上角的个人头像，选择 **Settings**。
+
+在左边的菜单中，找到并点击 **SSH and GPG keys**。
+
+点击绿色的 **New SSH key** 按钮。
+
+**Title**：给这个钥匙取一个好记的名字，例如 `My Ubuntu VM`。
+
+**Key**：将你刚刚复制的公钥内容，完整地粘贴到这个栏位。
+
+最后点击 **Add SSH key**。
+
+
+
+然后，登陆GitHub，点击头像选择**Setting**，在左边的菜单找到并点击**SSH and GPG keys**，点击绿色的 **New SSH key** 按钮。
+
+- **Title**：给这个钥匙取一个好记的名字，例如 `yy`。
+- **Key**：将你刚刚复制的公钥内容，完整地粘贴到这个栏位。
+
+- 点击 **Add SSH key**。
+
+完成SSH KEY创建后接着创建Github仓库，在右上角找到“Create a new repo”按钮，创建一个新的仓库,在Repository name填入`你的仓库名词`，这里我叫做`notebooktemp`其他保持默认设置，点击“Create repository”按钮，就成功地创建了一个新的Git仓库：
 
 目前，在GitHub上的这个``仓库还是空的，GitHub告诉我们，可以从这个仓库克隆出新的仓库，也可以把一个已有的本地仓库与之关联，然后，把本地仓库的内容推送到GitHub仓库。
 
