@@ -1,4 +1,3 @@
 1.
 Linux破解Typora教程，亲测可用:https://blog.csdn.net/weixin_65657501/article/details/142788747
-2.
 
