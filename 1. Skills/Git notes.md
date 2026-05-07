@@ -1366,7 +1366,8 @@ git clone git@github.com:user/demo.git
 
 ---
 
-##### 3. clone 指定目录名
+git reflog
+git reset --hard <提交ID>3. clone 指定目录名
 
 默认情况下，`git clone` 会使用仓库名作为本地目录名。
 
