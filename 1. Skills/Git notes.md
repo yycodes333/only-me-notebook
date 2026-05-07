@@ -1322,7 +1322,7 @@ git pull origin main
 
 
 
-#### 5. git clone
+#### 5. 克隆仓库
 
 `git clone` 用于把远程仓库完整复制到本地。
 
