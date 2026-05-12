@@ -2277,3 +2277,1140 @@ cv2.destroyAllWindows()
 ```
 
 ![cv23](image/cv23.png)
+
+### 3.4.4.6 轮廓提取
+
+轮廓检测是图像处理中的重要任务，用于提取图像中物体的边界，轮廓就是物体边界点的集合，轮廓之间可以是嵌套关系，比如一个轮廓可以包含另一个轮廓，比圆环就是外层圆这层轮廓，内部嵌套了一层内圆。
+
+对于之前学习的边缘检测检测得到的是边缘，而轮廓检测就是根据这个边缘来判断这一圈边界属于哪个物体。一般的轮廓特征有轮廓的面积、周长、边界矩形、最小外界矩形、最小外界圆等。
+
+**轮廓检测常用函数**
+
+| 函数名称                   | 功能描述               |
+| :------------------------- | :--------------------- |
+| `cv2.findContours()`       | 查找图像中的轮廓       |
+| `cv2.drawContours()`       | 在图像上绘制轮廓       |
+| `cv2.contourArea()`        | 计算轮廓的面积         |
+| `cv2.arcLength()`          | 计算轮廓的周长或弧长   |
+| `cv2.boundingRect()`       | 计算轮廓的边界矩形     |
+| `cv2.minAreaRect()`        | 计算轮廓的最小外接矩形 |
+| `cv2.minEnclosingCircle()` | 计算轮廓的最小外接圆   |
+| `cv2.approxPolyDP()`       | 对轮廓进行多边形近似   |
+
+接下来我们一次对常用的函数进行讲解。
+
+#### 1.  cv2.findContours()
+
+
+
+该函数用于**在二值图**像中查找轮廓。轮廓是图像中具有相同颜色或强度的连续点的曲线。在OpenCV中提供函数如下
+
+```
+contours, hierarchy = cv2.findContours(image, mode, method)
+```
+
+
+
+**参数描述**
+
+| 参数     | 说明                                                         |
+| -------- | ------------------------------------------------------------ |
+| `image`  | 输入图像，通常二值图（**通常为经过阈值处理或边缘检测后的图像**） |
+| `mode`   | 轮廓检索模式                                                 |
+| `method` | 轮廓近似方法                                                 |
+
+一般常见的轮廓模式有：
+
+| 模式                | 说明                 |
+| ------------------- | -------------------- |
+| `cv2.RETR_EXTERNAL` | 只找外轮廓           |
+| `cv2.RETR_LIST`     | 找全部轮廓，不建层级 |
+| `cv2.RETR_TREE`     | 找全部轮廓，建层级   |
+
+常见的轮廓近似方法有：
+
+| 方法                      | 说明         |
+| ------------------------- | ------------ |
+| `cv2.CHAIN_APPROX_SIMPLE` | 压缩点，常用 |
+| `cv2.CHAIN_APPROX_NONE`   | 保存所有点   |
+
+**返回值**
+
+- `contours`: 检测到的轮廓列表。
+- `hierarchy`: 轮廓的层次结构信息。
+
+#### 2. cv2.drawContours()
+
+该函数用于在图像上绘制检测到的轮廓。在OpenCV中提供函数：
+
+```
+cv2.drawContours(image, contours, contourIdx, color, thickness, lineType, hierarchy, maxLevel, offset)
+```
+
+
+
+**参数说明**
+
+| 数           | 是否必填 | 说明                                           |
+| ------------ | -------- | ---------------------------------------------- |
+| `image`      | 必填     | 要绘制轮廓的目标图像，函数**会直接修改这张图** |
+| `contours`   | 必填     | 轮廓列表，由 `cv2.findContours()` 得到         |
+| `contourIdx` | 必填     | 指定绘制第几个轮廓，`-1` 表示绘制所有轮廓      |
+| `color`      | 必填     | 轮廓颜色，例如 `(0, 255, 0)` 表示绿色          |
+| `thickness`  | 可选     | 轮廓线宽，正数表示线宽；`-1` 表示填充轮廓      |
+| `lineType`   | 可选     | 线条类型，例如 `cv2.LINE_8`、`cv2.LINE_AA`     |
+| `hierarchy`  | 可选     | 轮廓层级信息，由 `cv2.findContours()` 返回     |
+| `maxLevel`   | 可选     | 绘制轮廓的最大层级，配合 `hierarchy` 使用      |
+| `offset`     | 可选     | 轮廓点的偏移量，例如 `(x, y)`                  |
+
+> 说明：强调OpenCV绘图坐标和Numpy索引行列，所以这里偏移量格式是（x，y）
+>
+> | 场景                     | 写法          | 含义                           |
+> | ------------------------ | ------------- | ------------------------------ |
+> | OpenCV 绘图坐标 / 点坐标 | `(x, y)`      | `x` 表示横坐标，`y` 表示纵坐标 |
+> | NumPy 图像索引           | `image[y, x]` | 先写行 `y`，再写列 `x`         |
+
+**返回值**
+
+无返回值，直接在输入图像上绘制轮廓。
+
+
+
+代码示例
+
+```python
+import cv2
+import numpy as np
+
+img = cv2.imread('./src/Python_demo/image.jpg', 0)
+img = cv2.resize(img, (640, 480))
+
+# 二值化处理
+_, binary = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
+# 查找轮廓
+contours, hierarchy = cv2.findContours(binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+ima_copy = img.copy()
+
+cv2.drawContours(ima_copy, contours, -1, (255, 0, 0), 2)
+cv2.imshow('contours', ima_copy)
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+```
+
+![cv26](image/cv26.png)
+
+#### 3. cv2.contourArea()
+
+该函数用于计算轮廓的面积。在OpenCV中提供函数：
+
+```
+area = cv2.contourArea(contour, oriented)
+```
+
+**参数说明**
+
+| 参数       | 是否必填 | 说明                                               |
+| ---------- | -------- | -------------------------------------------------- |
+| `oriented` | 选填     | 是否返回有符号的面积，如果为True，返回有符号的面积 |
+| `contours` | 必填     | 轮廓列表，由 `cv2.findContours()` 得到             |
+
+**返回值**
+
+- area：轮廓的面积
+
+代码示例：
+
+```python
+for contour in contours:
+    area = cv2.contourArea(contour)
+    if area < 100:
+        continue
+```
+
+> 对于面积低于100可能是噪音造成的轮廓，此时我们不需要这样的轮廓，通过该函数可以对噪音的轮廓进行剔除，常用于过滤小噪声。
+
+代码示例：
+
+```python
+import cv2
+import numpy as np
+
+img = cv2.imread('./src/Python_demo/image.jpg')
+img = cv2.resize(img, (640, 480))
+
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+blur = cv2.GaussianBlur(gray, (5, 5), 0)
+edges = cv2.Canny(blur, 100, 200)
+
+kernel = np.ones((3, 3), np.uint8)
+#Canny 边缘线经常是断的，可以先做膨胀或闭运算
+edges_dilate = cv2.dilate(edges, kernel, iterations=1)
+
+contours, _ = cv2.findContours(
+    edges_dilate,
+    cv2.RETR_EXTERNAL,
+    cv2.CHAIN_APPROX_SIMPLE
+)
+
+output = img.copy()
+
+for contour in contours:
+    area = cv2.contourArea(contour)
+    if area < 100:
+        continue
+
+    cv2.drawContours(output, [contour], -1, (0, 255, 0), 2)
+
+cv2.imshow('Original', img)
+cv2.imshow('Edges', edges)
+cv2.imshow('Dilated Edges', edges_dilate)
+cv2.imshow('Contours', output)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+```
+
+![cv27](image/cv27.png)
+
+
+
+#### 4. cv2.arcLength()
+
+该函数用于计算轮廓的周长或弧长。在OpenCV中提供函数：
+
+```
+length = cv2.arcLength(curve, closed)
+```
+
+**参数说明**
+
+| 参数     | 是否必填 | 说明                                               |
+| -------- | -------- | -------------------------------------------------- |
+| `curve`  | 必填     | 轮廓列表，由 `cv2.findContours()` 得到结果的元素。 |
+| `closed` | 必填     | 布尔值，表示轮廓是否闭合。                         |
+
+**返回值**:
+
+- length：轮廓的周长或弧长
+
+
+
+代码示例
+
+```python
+for contour in contours:
+    perimeter = cv2.arcLength(contour, True)
+    print(f"Contour perimeter: {perimeter}")
+```
+
+
+
+#### 5. cv2.boundingRect()
+
+该函数用于计算轮廓的边界矩形。在OpenCV中提供函数：
+
+```
+x, y, w, h = cv2.boundingRect(points)
+```
+
+**参数说明**
+
+- `points`: 输入的轮廓点集。
+
+**返回值**
+
+- 边界矩形的左上角坐标 `(x, y)` 和宽度 `w`、高度 `h`。
+
+代码示例：
+
+```python
+for contour in contours:
+    x, y, w, h = cv2.boundingRect(contour)
+    cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+cv2.imshow('Bounding Rectangles', image)
+cv2.waitKey(0)
+```
+
+![cv28](image/cv28.png)
+
+
+
+#### 6. cv2.minAreaRect()
+
+该函数用于计算轮廓的最小外接矩形（旋转矩形）。在OpenCV中提供函数：
+
+```
+rect = cv2.minAreaRect(points)
+```
+
+**参数说明**:
+
+- `points`: 输入的轮廓点集。
+
+**返回值**:
+
+- 返回一个旋转矩形，包含中心点 `(x, y)`、宽度、高度和旋转角度。
+
+代码示例：
+
+```python
+for contour in contours:
+    rect = cv2.minAreaRect(contour)
+    box = cv2.boxPoints(rect)
+    box = np.int0(box)
+    cv2.drawContours(image, [box], 0, (0, 0, 255), 2)
+cv2.imshow('Min Area Rectangles', image)
+cv2.waitKey(0)
+```
+
+![cv29](image/cv29.png)
+
+#### 7. cv2.minEnclosingCircle()
+
+该函数用于计算轮廓的最小外接圆。在OpenCV中提供函数：
+
+```
+(center, radius) = cv2.minEnclosingCircle(points)
+```
+
+**参数说明**:
+
+- `points`: 输入的轮廓点集。
+
+**返回值**:
+
+- 返回圆心 `(x, y)` 和半径 `radius`
+
+代码示例：
+
+```python
+for contour in contours:
+    (x, y), radius = cv2.minEnclosingCircle(contour)
+    center = (int(x), int(y))
+    radius = int(radius)
+    cv2.circle(image, center, radius, (255, 0, 0), 2)
+cv2.imshow('Min Enclosing Circles', image)
+cv2.waitKey(0)
+```
+
+![cv30](image/cv30.png)
+
+#### 8.  cv2.approxPolyDP()
+
+该函数用于对轮廓进行多边形近似。在OpenCV中提供函数：
+
+```
+approx = cv2.approxPolyDP(curve, epsilon, closed)
+```
+
+
+
+**参数说明**
+
+| 参数      | 是否必填 | 说明                                               |
+| --------- | -------- | -------------------------------------------------- |
+| `curve`   | 必填     | 轮廓列表，由 `cv2.findContours()` 得到结果的元素。 |
+| `epsilon` | 必填     | 近似精度，值越小，近似越精确。                     |
+| `closed`  | 必填     | 布尔值，表示轮廓是否闭合。                         |
+
+**返回值**:
+
+- 返回近似后的多边形点集
+
+代码示例：
+
+```python
+for contour in contours:
+    epsilon = 0.01 * cv2.arcLength(contour, True)
+    approx = cv2.approxPolyDP(contour, epsilon, True)
+    cv2.drawContours(image, [approx], 0, (0, 255, 0), 2)
+cv2.imshow('Approx Polygons', image)
+cv2.waitKey(0)
+```
+
+![cv31](image/cv31.png)
+
+### 3.4.4.7 形态学
+
+图像形态学操作是图像处理中的一种重要技术，主要用于处理**二值图**，处理前景区域的形状。
+
+OpenCV 中的图像形态学操作是图像处理中的重要工具，通过腐蚀、膨胀、开运算、闭运算和形态学梯度等操作，可以实现对图像的噪声去除、对象分离、边缘检测等效果。掌握这些操作有助于更好地处理和分析图像数据。
+
+以下是 OpenCV 中常用的形态学操作及其函数：
+
+| **操作**       | **函数**             | **说明**                                                     | **应用场景**               |
+| :------------- | :------------------- | :----------------------------------------------------------- | :------------------------- |
+| **腐蚀**       | `cv2.erode()`        | 用结构元素扫描图像，如果结构元素覆盖的区域全是前景，则保留中心像素。 | 去除噪声、分离物体。       |
+| **膨胀**       | `cv2.dilate()`       | 用结构元素扫描图像，如果结构元素覆盖的区域存在前景，则保留中心像素。 | 连接断裂的物体、填充空洞。 |
+| **开运算**     | `cv2.morphologyEx()` | 先腐蚀后膨胀。                                               | 去除小物体、平滑物体边界。 |
+| **闭运算**     | `cv2.morphologyEx()` | 先膨胀后腐蚀。                                               | 填充小孔洞、连接邻近物体。 |
+| **形态学梯度** | `cv2.morphologyEx()` | 膨胀图减去腐蚀图。                                           | 提取物体边缘。             |
+| **顶帽运算**   | `cv2.morphologyEx()` | 原图减去开运算结果。                                         | 提取比背景亮的细小物体。   |
+| **黑帽运算**   | `cv2.morphologyEx()` | 闭运算结果减去原图。                                         | 提取比背景暗的细小物体。   |
+
+
+
+#### 1. Kernel
+
+在正式学习形态学的具体操作之前，我们先引入一个重要概念：**结构元素（Structuring Element，也常称为 Kernel）** 。
+
+在前面学习滤波和边缘检测时，我们已经接触过 `ksize` 或滤波核的概念。比如在滤波操作中，滤波核会在图像上滑动，对指定邻域内的像素进行加权计算；在边缘检测求导操作中，卷积核则用于计算局部像素灰度变化，从而提取边缘信息。
+
+类似地，在形态学操作中，也需要一个小的操作窗口来作用于图像的局部区域，这个窗口就是**结构元素**。它会在图像上逐步移动，并根据不同的形态学操作规则，对覆盖区域内的像素进行处理。
+
+> 结构元素可以简单理解为：形态学操作中的局部处理窗口。
+
+它会在图像上不断滑动，并根据不同的形态学操作规则，对当前覆盖区域内的像素进行判断和处理。
+
+需要注意的是，结构元素虽然也叫 Kernel，但它和滤波中的卷积核作用并不完全相同：
+
+- 滤波核主要用于数值计算，例如求平均值、加权求和、计算梯度等。
+- 结构元素主要用于形状判断，例如缩小目标、扩大目标、连接断裂区域、去除小噪声等。
+
+关于Kernel创建有两种方式，一种是直接使用Numpy数组进行创建，另一种 是在OpenCV中使用内置函数`cv2.getStructuringElement`创建，下面我们依次介绍。
+
+最简单的方式是使用 `numpy` 创建一个全 1 矩阵：
+
+```
+kernel = np.ones((5, 5), np.uint8)
+```
+
+> 这表示创建一个大小为 `5 × 5` 的结构元素：后续形态学操作时，会以当前像素为中心，查看它周围 `5 × 5` 范围内的像素情况。
+
+在 OpenCV 中，也可以使用
+
+```
+kernel = cv2.getStructuringElement(shape, ksize)
+```
+
+**参数说明**
+
+| 参数    | 说明                                     |
+| ------- | ---------------------------------------- |
+| `shape` | 结构元素的形状                           |
+| `ksize` | 结构元素的大小，格式为 `(width, height)` |
+
+常见的结构元素形状有三种：
+
+
+
+| 形状                | 含义           |
+| ------------------- | -------------- |
+| `cv2.MORPH_RECT`    | 矩形结构元素   |
+| `cv2.MORPH_ELLIPSE` | 椭圆结构元素   |
+| `cv2.MORPH_CROSS`   | 十字形结构元素 |
+
+代码示例
+
+```python
+import cv2
+import numpy as np
+
+# 矩形结构元素
+kernel_rect = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
+
+# 椭圆结构元素
+kernel_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+
+# 十字形结构元素
+kernel_cross = cv2.getStructuringElement(cv2.MORPH_CROSS, (5, 5))
+
+print(kernel_rect)
+print(kernel_ellipse)
+print(kernel_cross)
+```
+
+输出如下：
+
+```
+[[1 1 1 1 1]
+ [1 1 1 1 1]
+ [1 1 1 1 1]
+ [1 1 1 1 1]
+ [1 1 1 1 1]]
+[[0 0 1 0 0]
+ [1 1 1 1 1]
+ [1 1 1 1 1]
+ [1 1 1 1 1]
+ [0 0 1 0 0]]
+[[0 0 1 0 0]
+ [0 0 1 0 0]
+ [1 1 1 1 1]
+ [0 0 1 0 0]
+ [0 0 1 0 0]]
+```
+
+
+
+不同形状的结构元素，在形态学操作中会产生不同的效果。
+
+例如：
+
+- 矩形结构元素：作用范围较完整，常用。
+- 椭圆结构元素：更适合处理圆形、弧形区域。
+- 十字形结构元素：只关注上下左右方向，对斜向像素影响较小。
+
+不同大小的结构元素对形态学操作中会产生不同的效果。
+
+较小的结构元素，例如 `(3, 3)`：
+
+- 操作效果较弱。
+- 对图像细节影响较小。
+- 更适合处理小噪声。
+- 对目标形状破坏较少。
+
+较大的结构元素，例如 `(9, 9)`：
+
+- 操作效果更强。
+- 腐蚀时目标会缩小更多。
+- 膨胀时目标会扩大更多。
+- 可能会破坏图像细节。
+- 更适合处理较大的孔洞或断裂区域。
+
+#### 1.腐蚀
+
+腐蚀操作是一种**缩小图像中前景对象**的过程，这里的前景指的是**二值图中的白色区域**。
+
+腐蚀操作通过将结构元素与图像进行卷积，只有当结构元素完全覆盖图像中的前景像素时，中心像素才会被保留，否则会被腐蚀掉，也就是说腐蚀操作会让白色区域变小，黑色区域相对扩大。
+
+因此，它常用于去除图像中的小白点噪声，或者让目标区域变细、变小，实现粘连在一起的内容的分裂的等。
+
+> 简单理解：腐蚀会让前景对象向内部收缩。
+
+腐蚀实现的原理：让结构元素在图像上滑动，在结果元素覆盖的区域中，只有当所有元素满足前景条件，中心像素才会保留为前景，否则中心像素变成背景。
+
+对于二值图像来说，可以理解为：
+
+- 如果结构元素覆盖区域内全是白色，中心点保留为白色。
+- 如果结构元素覆盖区域内存在黑色，中心点就变成黑色。
+
+对于灰度图来说，可以理解为：
+
+- 取结构元素覆盖区域内的最小值。
+
+在OpenCV中提供腐蚀函数`dst = cv2.erode()`
+
+```python
+dst = cv2.erode(src, kernel, iterations=1)
+```
+
+**参数说明**
+
+| 参数         | 说明                                                         |
+| ------------ | ------------------------------------------------------------ |
+| `src`        | 输入图像，通常是**二值图像**，或者是灰度图。                 |
+| `kernel`     | 结构元素，可以自定义或使用 `cv2.getStructuringElement()` 生成 |
+| `iterations` | 腐蚀操作的次数，默认为 `1`                                   |
+
+**返回值**
+
+- `dst`：腐蚀后的输出图像。
+
+代码示例
+
+```python
+import cv2
+import numpy as np
+
+# 读取图像
+image = cv2.imread('./src/Python_demo/image.jpg', 0)
+image = cv2.resize(image, (640, 480))
+
+# 二值化处理
+_, binary = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY)
+
+# 定义结构元素
+kernel = np.ones((5, 5), np.uint8)
+
+# 腐蚀操作
+eroded_image = cv2.erode(binary, kernel, iterations=1)
+
+# 显示结果
+cv2.imshow('Binary Image', binary)
+cv2.imshow('Eroded Image', eroded_image)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+```
+
+
+
+![cv32](image/cv32.png)
+
+
+
+> 对于二值图：
+>
+> 腐蚀之后：
+>
+> - 白色前景区域会变小。
+> - 细小的白色噪点可能会被去除。
+> - 较细的连接部分可能会被断开。
+> - 目标边界会向内部收缩。
+>
+> 因此，腐蚀常用于去除图像中的小白点噪声，或者分离两个靠得比较近的前景区域。
+>
+> 对于灰度图：
+>
+> 最终效果会压低亮区域，使图像局部变暗。
+
+---
+
+#### 3. 膨胀
+
+膨胀操作与腐蚀操作相反，它是一种**扩大图像中前景对象**的过程。
+
+膨胀操作会让白色区域变大，黑色区域相对缩小。它常用于填补目标区域中的小孔洞，或者连接断裂的前景区域。
+
+可以简单理解为：
+
+> 膨胀会让前景对象向外扩张。
+
+膨胀的实现原理：膨胀操作同样会让结构元素在图像上滑动，当结构元素覆盖的区域中，只要存在一个前景像素，中心像素就会被设置为前景。
+
+对于二值图像来说，可以理解为：
+
+- 如果结构元素覆盖区域内存在白色，中心点就变成白色。
+- 只有当结构元素覆盖区域内全是黑色时，中心点才保持黑色。
+
+对于灰度图像来说，可以理解为：
+
+- 取结构元素覆盖区域内的最大值。
+
+因此，白色区域会向外扩展，目标区域会变大。
+
+在OpenCV中，对膨胀提供函数`cv2.dilate()`
+
+```python
+dst = cv2.dilate(src, kernel, iterations=1)
+```
+
+**参数说明**
+
+| 参数         | 说明                                                         |
+| ------------ | ------------------------------------------------------------ |
+| `src`        | 输入图像，通常是**二值图像**，或者是灰度图                   |
+| `kernel`     | 结构元素，可以自定义或使用 `cv2.getStructuringElement()` 生成 |
+| `iterations` | 膨胀操作的次数，默认为 `1`                                   |
+
+**返回值**
+
+- `dst`：膨胀后的输出图像。
+
+代码示例
+
+```python
+import cv2
+import numpy as np
+
+# 读取图像
+image = cv2.imread('./src/Python_demo/image.jpg', 0)
+image = cv2.resize(image, (640, 480))
+
+# 二值化处理
+_, binary = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY)
+
+# 定义结构元素
+kernel = np.ones((5, 5), np.uint8)
+
+# 膨胀操作
+dilated_image = cv2.dilate(binary, kernel, iterations=1)
+
+# 显示结果
+cv2.imshow('Binary Image', binary)
+cv2.imshow('Dilated Image', dilated_image)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+```
+
+![cv33](image/cv33.png)
+
+> 对于二值图：
+>
+> 膨胀之后：
+>
+> - 白色前景区域会变大。
+> - 目标边界会向外扩张。
+> - 图像中的小黑洞可能会被填充。
+> - 断裂的白色区域可能会被连接起来。
+>
+> 因此，膨胀常用于连接断开的目标区域，或者填补前景对象中的小缺口。
+>
+> 对于灰度图：
+>
+> 最终效果会抬高暗区域，使图像局部变亮
+
+---
+
+#### 4. 开运算 
+
+开运算是腐蚀和膨胀的组合操作。它的执行顺序是：先腐蚀，再膨胀，也就是说：开运算 = 腐蚀 + 膨胀。
+
+由于开运算先进行腐蚀，所以可以先去除图像中较小的白色噪声，随后再进行膨胀，使较大的前景目标尽量恢复到原来的大小。
+
+因此，开运算常用于：
+
+- 去除小的白色噪声。
+- 分离轻微连接的目标。
+- 在尽量保留主体形状的同时，清理前景区域中的小干扰。
+
+可以简单理解为：
+
+> 开运算适合去除前景中的小白点噪声。
+
+在OpenCV提供开运算函数 `cv2.morphologyEx()`
+
+```python
+dst = cv2.morphologyEx(src, op, kernel)
+```
+
+当进行开运算时，`op` 使用：
+
+```python
+cv2.MORPH_OPEN
+```
+
+完整写法：
+
+```python
+dst = cv2.morphologyEx(src, cv2.MORPH_OPEN, kernel)
+```
+
+**参数说明**
+
+| 参数     | 说明                                                         |
+| -------- | ------------------------------------------------------------ |
+| `src`    | 输入图像，通常是**二值图像**，或者灰度图。                   |
+| `op`     | 形态学操作类型，开运算使用 `cv2.MORPH_OPEN`                  |
+| `kernel` | 结构元素，可以自定义或使用 `cv2.getStructuringElement()` 生成 |
+
+**返回值**
+
+- `dst`：开运算后的输出图像。
+
+代码示例
+
+```python
+import cv2
+import numpy as np
+
+# 读取图像
+image = cv2.imread('./src/Python_demo/image.jpg', 0)
+image = cv2.resize(image, (640, 480))
+
+# 二值化处理
+_, binary = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY)
+
+# 定义结构元素
+kernel = np.ones((5, 5), np.uint8)
+
+# 开运算：先腐蚀，再膨胀
+open_image = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel)
+
+# 显示结果
+cv2.imshow('Binary Image', binary)
+cv2.imshow('Open Image', open_image)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+```
+
+![cv34](image/cv34.png)
+
+> 对于二值图：
+>
+> 开运算之后：
+>
+> - 小的白色噪点会被去除。
+> - 较大的前景目标会被保留。
+> - 细小的连接区域可能会被断开。
+> - 目标整体形状不会像单独腐蚀那样明显缩小。
+>
+> 因此，开运算常用于二值图像的去噪处理。
+>
+> 对于灰度图：
+>
+> 开运算之后：
+>
+> - 小的亮区域会被削弱或去除。
+> - 图像中的亮点噪声会减少。
+> - 较大的亮区域会被相对保留。
+> - 可以用于背景估计、光照校正等任务。
+
+---
+
+#### 5. 闭运算
+
+闭运算也是腐蚀和膨胀的组合操作。它的执行顺序是：先膨胀，再腐蚀，也就是说：闭运算 = 膨胀 + 腐蚀。
+
+由于闭运算先进行膨胀，所以可以先扩大前景区域，从而填补前景对象中的小黑洞，或者连接断裂的前景区域。
+
+随后再进行腐蚀，使目标区域尽量恢复到原来的大小。
+
+因此，闭运算常用于：
+
+- 填补前景对象内部的小孔洞。
+- 连接断裂的白色区域。
+- 平滑目标边界。
+- 在尽量保留主体大小的情况下，修补前景区域。
+
+可以简单理解为：
+
+> 闭运算适合填补前景中的小黑洞，或者连接断裂区域。
+
+在OpenCV提供闭运算函数`cv2.morphologyEx（）`
+
+```python
+dst = cv2.morphologyEx(src, op, kernel)
+```
+
+当进行闭运算时，`op` 使用：
+
+```python
+cv2.MORPH_CLOSE
+```
+
+完整写法：
+
+```python
+dst = cv2.morphologyEx(src, cv2.MORPH_CLOSE, kernel)
+```
+
+**参数说明**
+
+| 参数     | 说明                                                         |
+| -------- | ------------------------------------------------------------ |
+| `src`    | 输入图像，通常是二值图像，或者灰度图。                       |
+| `op`     | 形态学操作类型，闭运算使用 `cv2.MORPH_CLOSE`                 |
+| `kernel` | 结构元素，可以自定义或使用 `cv2.getStructuringElement()` 生成 |
+
+**返回值**
+
+- `dst`：闭运算后的输出图像。
+
+ 代码示例
+
+```python
+import cv2
+import numpy as np
+
+# 读取图像
+image = cv2.imread('./src/Python_demo/image.jpg', 0)
+image = cv2.resize(image, (640, 480))
+
+# 二值化处理
+_, binary = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY)
+
+# 定义结构元素
+kernel = np.ones((5, 5), np.uint8)
+
+# 闭运算：先膨胀，再腐蚀
+close_image = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel)
+
+# 显示结果
+cv2.imshow('Binary Image', binary)
+cv2.imshow('Close Image', close_image)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+```
+
+![cv35](image/cv35.png)
+
+> 对于二值图：
+>
+> 闭运算之后：
+>
+> - 前景对象中的小黑洞会被填补。
+> - 距离较近的白色区域可能会被连接。
+> - 断裂的边缘可能会变得连续。
+> - 目标整体大小不会像单独膨胀那样明显变大。
+>
+> 因此，闭运算常用于修补前景区域中的缺口或断裂。
+>
+> 对于灰度图：
+>
+> - 小的暗区域会被削弱或填补。
+> - 图像中的暗点噪声会减少。
+> - 较大的暗区域会被相对保留。
+> - 可以用于修复局部暗缺陷、平滑图像中的暗细节。
+
+---
+
+#### 6. 形态学梯度
+
+形态学梯度是膨胀图像和腐蚀图像之间的差值，它的计算方式可以理解为：形态学梯度 = 膨胀结果 - 腐蚀结果。
+
+由于膨胀会让前景区域变大，腐蚀会让前景区域变小，两者相减之后，保留下来的主要就是目标边界附近的区域。
+
+因此，形态学梯度常用于提取图像中前景对象的边缘，所以形态学梯度主要用于突出目标轮廓。它和 Canny 边缘检测类似，都可以得到边缘信息，但是两者原理不同：
+
+- Canny 主要根据灰度变化来检测边缘。
+- 形态学梯度主要根据膨胀和腐蚀之间的差异来提取边缘。
+
+> 可以简单理解为：形态学梯度可以提取前景对象的外轮廓边缘。
+
+在OpenCV中提供函数`cv2.morphologyEx`
+
+```python
+dst = cv2.morphologyEx(src, op, kernel)
+```
+
+当进行形态学梯度时，`op` 使用：
+
+```python
+cv2.MORPH_GRADIENT
+```
+
+完整写法：
+
+```python
+dst = cv2.morphologyEx(src, cv2.MORPH_GRADIENT, kernel)
+```
+
+**参数说明**
+
+| 参数     | 说明                                                         |
+| -------- | ------------------------------------------------------------ |
+| `src`    | 输入图像，通常**是二值图像**，也可以是**灰度图**             |
+| `op`     | 形态学操作类型，形态学梯度使用 `cv2.MORPH_GRADIENT`          |
+| `kernel` | 结构元素，可以自定义或使用 `cv2.getStructuringElement()` 生成 |
+
+
+
+**返回值**
+
+- `dst`：形态学梯度处理后的输出图像。
+
+ 代码示例
+
+```python
+import cv2
+import numpy as np
+
+# 读取图像
+image = cv2.imread('./src/Python_demo/image.jpg', 0)
+image = cv2.resize(image, (640, 480))
+
+# 二值化处理
+_, binary = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY)
+
+# 定义结构元素
+kernel = np.ones((5, 5), np.uint8)
+
+# 形态学梯度
+gradient_image = cv2.morphologyEx(binary, cv2.MORPH_GRADIENT, kernel)
+
+# 显示结果
+cv2.imshow('Binary Image', binary)
+cv2.imshow('Gradient Image', gradient_image)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+```
+
+![cv36](image/cv36.png)
+
+> 形态学梯度之后：
+>
+> - 图像中的前景边界会被突出。
+> - 前景内部大面积区域会被削弱。
+> - 结果通常表现为目标对象的轮廓。
+> - 常用于边缘提取、轮廓分析等任务。
+>
+> 需要注意的是，结构元素越大，提取出的边缘通常越粗；结构元素越小，边缘越细。
+
+
+
+
+
+#### 7. 顶帽运算
+
+顶帽运算是**原图像和开运算结果之间的差值**，它的计算方式可以理解为：顶帽运算 = 原图像 - 开运算结果。
+
+由于开运算可以去除较小的白色亮区域，因此原图减去开运算结果后，留下来的通常就是那些被开运算去除的小亮区域。因此，顶帽运算主要用于提取图像中比周围区域更亮的小目标，所以一般顶帽运算应用于提取亮点、提取小的白色区域、处理光照不均匀的图像、增强图像中的局部亮细节。
+
+> 可以简单理解为：顶帽运算用于提取图像中的小亮区域。
+
+
+
+在OpenCV中对于顶帽运算提供函数`cv2.morphologyEx`。
+
+```python
+dst = cv2.morphologyEx(src, op, kernel)
+```
+
+当进行顶帽运算时，`op` 使用：
+
+```python
+cv2.MORPH_TOPHAT
+```
+
+完整写法：
+
+```python
+dst = cv2.morphologyEx(src, cv2.MORPH_TOPHAT, kernel)
+```
+
+**参数说明**
+
+| 参数     | 说明                                                         |
+| -------- | ------------------------------------------------------------ |
+| `src`    | 输入图像，可以是**灰度图或二值图**                           |
+| `op`     | 形态学操作类型，顶帽运算使用 `cv2.MORPH_TOPHAT`              |
+| `kernel` | 结构元素，可以自定义或使用 `cv2.getStructuringElement()` 生成 |
+
+**返回值**
+
+- `dst`：顶帽运算后的输出图像。
+
+ 代码示例
+
+```python
+import cv2
+import numpy as np
+
+# 读取图像
+image = cv2.imread('./src/Python_demo/image.jpg', 0)
+image = cv2.resize(image, (640, 480))
+
+# 定义结构元素
+kernel = np.ones((9, 9), np.uint8)
+
+# 顶帽运算
+tophat_image = cv2.morphologyEx(image, cv2.MORPH_TOPHAT, kernel)
+
+# 显示结果
+cv2.imshow('Original Image', image)
+cv2.imshow('Tophat Image', tophat_image)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+```
+
+![cv38](image/cv38.png)
+
+
+
+> 顶帽运算之后：
+>
+> - 图像中的小亮区域会被突出。
+> - 大面积背景信息会被削弱。
+> - 可以用于提取亮色细节。
+> - 对光照不均匀的图像有一定改善作用。
+>
+
+#### 8. 黑帽运算 
+
+黑帽运算是闭运算结果和原图像之间的差值，它的计算方式为：黑帽运算 = 闭运算结果 - 原图像
+
+由于闭运算可以填补较小的黑色暗区域，因此闭运算结果减去原图之后，留下来的通常就是那些被闭运算填补的小暗区域，所以黑帽运算主要用于提取图像中比周围区域更暗的小目标。
+
+一般黑帽运算应用于提取暗点、提取黑色细节、检测图像中的裂缝、增强图像中的局部暗区域等
+
+常见用途包括：
+
+> 可以简单理解为：黑帽运算用于提取图像中的小暗区域。
+
+在OpenCV中对于顶帽运算提供函数`cv2.morphologyEx`。
+
+```python
+dst = cv2.morphologyEx(src, op, kernel)
+```
+
+当进行黑帽运算时，`op` 使用：
+
+```python
+cv2.MORPH_BLACKHAT
+```
+
+完整写法：
+
+```python
+dst = cv2.morphologyEx(src, cv2.MORPH_BLACKHAT, kernel)
+```
+
+**参数说明**
+
+| 参数     | 说明                                                         |
+| -------- | ------------------------------------------------------------ |
+| `src`    | 输入图像，可以是灰度图或二值图                               |
+| `op`     | 形态学操作类型，黑帽运算使用 `cv2.MORPH_BLACKHAT`            |
+| `kernel` | 结构元素，可以自定义或使用 `cv2.getStructuringElement()` 生成 |
+
+**返回值**
+
+- `dst`：黑帽运算后的输出图像。
+
+ 代码示例
+
+```python
+import cv2
+import numpy as np
+
+# 读取图像
+image = cv2.imread('./src/Python_demo/image.jpg', 0)
+image = cv2.resize(image, (640, 480))
+
+# 定义结构元素
+kernel = np.ones((9, 9), np.uint8)
+
+# 黑帽运算
+blackhat_image = cv2.morphologyEx(image, cv2.MORPH_BLACKHAT, kernel)
+
+# 显示结果
+cv2.imshow('Original Image', image)
+cv2.imshow('Blackhat Image', blackhat_image)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+```
+
+![cv39](image/cv39.png)
+
+> 黑帽运算之后：
+>
+> - 图像中的小暗区域会被突出。
+> - 亮色背景会被削弱。
+> - 可以用于提取黑色细节。
+> - 常用于裂缝检测、文字增强、暗区域提取等任务。
+>
+
+#### 9. iterations
+
+在腐蚀和膨胀函数中，经常会看到 `iterations` 参数,，`iterations` 表示操作执行的次数，`iterations`参数对形态学操作影响很大。
+
+当 `iterations` 越大时，腐蚀效果越明显，膨胀效果也越明显。
+
+腐蚀表现为：
+
+- 白色区域缩小得更多。
+- 较细的目标更容易消失。
+- 小的白色噪点更容易被去除。
+
+例如：
+
+```python
+eroded_image = cv2.erode(binary, kernel, iterations=3)
+```
+
+表示连续腐蚀 3 次。
+
+膨胀表现为：
+
+- 白色区域扩大得更多。
+- 断裂区域更容易连接。
+- 小黑洞更容易被填补。
+
+例如：
+
+```python
+dilated_image = cv2.dilate(binary, kernel, iterations=3)
+```
+
+表示连续膨胀 3 次。
+
+
+
+
+
+
+
+
+
