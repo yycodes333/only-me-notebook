@@ -601,8 +601,7 @@ image[100:300, 200:400] = [255, 255, 255]
 ## 6.5 ROI 复制粘贴
 
 ```python
-roi = image[100:200, 100:200]
-image[300:400, 300:400] = roi
+                                                                                                                                                                           
 ```
 
 两个区域尺寸必须一致。
@@ -1704,6 +1703,18 @@ cv2.destroyAllWindows()
 hist = cv2.calcHist([gray], [0], None, [256], [0, 256])
 ```
 
+| 参数      | 说明              |
+| --------- | ----------------- |
+| `[gray]`  | 输入图像列表      |
+| `[0]`     | 通道索引          |
+| `None`    | mask              |
+| `[256]`   | 统计 256 个灰度级 |
+| `[0,256]` | 像素范围          |
+
+---
+
+## 
+
 ---
 
 ## 16.3 直方图均衡化：`cv2.equalizeHist()`
@@ -2690,5 +2701,34 @@ dst_pts = np.float32([
 
 ---
 
+## 附录 A：常用函数速查表
 
-
+| 模块       | 函数                      | 作用         |
+| ---------- | ------------------------- | ------------ |
+| 图像读写   | `cv2.imread()`            | 读取图像     |
+| 图像显示   | `cv2.imshow()`            | 显示图像     |
+| 按键等待   | `cv2.waitKey()`           | 等待键盘输入 |
+| 图像保存   | `cv2.imwrite()`           | 保存图像     |
+| 颜色转换   | `cv2.cvtColor()`          | 转换颜色空间 |
+| 缩放       | `cv2.resize()`            | 调整大小     |
+| 平移/旋转  | `cv2.warpAffine()`        | 仿射变换     |
+| 翻转       | `cv2.flip()`              | 图像翻转     |
+| 阈值       | `cv2.threshold()`         | 普通阈值     |
+| 自适应阈值 | `cv2.adaptiveThreshold()` | 局部阈值     |
+| 均值滤波   | `cv2.blur()`              | 均值模糊     |
+| 高斯滤波   | `cv2.GaussianBlur()`      | 高斯模糊     |
+| 中值滤波   | `cv2.medianBlur()`        | 中值去噪     |
+| 边缘检测   | `cv2.Canny()`             | Canny 边缘   |
+| 轮廓检测   | `cv2.findContours()`      | 查找轮廓     |
+| 画轮廓     | `cv2.drawContours()`      | 绘制轮廓     |
+| 轮廓面积   | `cv2.contourArea()`       | 计算面积     |
+| 外接矩形   | `cv2.boundingRect()`      | 获取矩形框   |
+| 腐蚀       | `cv2.erode()`             | 缩小白色区域 |
+| 膨胀       | `cv2.dilate()`            | 扩大白色区域 |
+| 形态学     | `cv2.morphologyEx()`      | 开闭运算等   |
+| 掩膜       | `cv2.inRange()`           | 生成 mask    |
+| 位运算     | `cv2.bitwise_and()`       | 按 mask 提取 |
+| 融合       | `cv2.addWeighted()`       | 图像融合     |
+| 直方图     | `cv2.calcHist()`          | 计算直方图   |
+| 均衡化     | `cv2.equalizeHist()`      | 对比度增强   |
+| 透视变换   | `cv2.warpPerspective()`   | 透视校正     |
