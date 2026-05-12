@@ -1973,6 +1973,233 @@ cv2.destroyAllWindows()
 
 ### 3.4.4.6 边缘检测
 
+ 图像边缘检测是计算机视觉和图像处理中的一项基本任务，它用于识别图像中亮度变化明显的区域，这些区域通常对应于物体的边界。简单来说，边缘检测就是找到图像中灰度或者颜色变化明显的位置，然后把这些边缘提取出来，经过内部处理，返回一张边缘图，通常是二值图是。
+
+边缘检测据比如说检测物体和背景的交界处、文字和纸张的交界处、圆和背景之间的分解出等。
+
+在OpenCV中，对边缘检测提供了多种函数，这里我们将讲解以下四种常用的边缘检测函数：
+
+| **函数**              | **算法**       | **说明**                                         | **适用场景**                   |
+| :-------------------- | :------------- | :----------------------------------------------- | :----------------------------- |
+| **`cv2.Canny()`**     | Canny 边缘检测 | 多阶段算法，检测效果较好，噪声抑制能力强。       | 通用边缘检测，适合大多数场景。 |
+| **`cv2.Sobel()`**     | Sobel 算子     | 基于一阶导数的边缘检测，可以检测水平和垂直边缘。 | 检测水平和垂直边缘。           |
+| **`cv2.Scharr()`**    | Scharr 算子    | Sobel 算子的改进版本，对边缘的响应更强。         | 检测细微的边缘。               |
+| **`cv2.Laplacian()`** | Laplacian 算子 | 基于二阶导数的边缘检测，对噪声敏感。             | 检测边缘和角点。               |
+
+接下来依次经行讲解。
+
+#### 1. Canny
+
+Canny 边缘检测算法主要包括以下几个步骤：
+
+1. **噪声抑制**：使用高斯滤波器对图像进行平滑处理，以减少噪声的影响。
+2. **计算梯度**：使用 Sobel 算子计算图像的梯度幅值和方向。
+3. **非极大值抑制**：沿着梯度方向，保留局部梯度最大的像素点，抑制其他像素点。
+4. **双阈值检测**：使用两个阈值（低阈值和高阈值）来确定真正的边缘。高于高阈值的像素点被认为是强边缘，低于低阈值的像素点被抑制，介于两者之间的像素点如果与强边缘相连则保留。
+5. **边缘连接**：通过滞后阈值处理，将弱边缘与强边缘连接起来，形成完整的边缘。
+
+
+
+在 OpenCV 中，可以使用 `cv2.Canny()` 函数来实现 Canny 边缘检测。
+
+```
+edges = cv2.Canny(image, threshold1, threshold2, apertureSize=3, L2gradient=False)
+```
+
+**参数说明**
+
+| 参数 | 说明 |
+|---|---|
+| `image` | 输入图像，通常是**灰度图** |
+| `threshold1` | 低阈值，当像素值低于该阈值，将会被丢弃，即认为不是边缘 |
+| `threshold2` | 高阈值，当像素值高于该阈值，将会被保留，即认为一定是边缘 |
+| `apertureSize` | Sobel 算子的孔径大小，默认为 3 |
+| `L2gradient` | 是否使用 L2 范数计算梯度幅值，默认为 False（使用 L1 范数）。 |
+
+**返回值**
+
+- edges：输出结果，即边缘检测后的图像。
+
+> 注意：Canny 通常建议输入灰度图，若果输入是彩色图，一般会边缘检测前转换成**灰度图**。
+>
+> 当像素值在最小阈值和最大阈值之间，那么会判断，如果这个像素和`threshold2`相连，那么会保留，即认为是边缘，否则丢弃。
+
+
+
+代码示例：
+
+
+```python
+import cv2
+import numpy as np
+
+# 读取图像
+img = cv2.imread('./src/Python_demo/image.jpg', 0)
+img = cv2.resize(img,(640,480))
+
+
+edges = cv2.Canny(img, 100, 200)
+
+
+# 显示结果
+cv2.imshow('Binary Threshold', edges)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+```
+
+![cv20](image/cv20.png)
+
+#### 2.Sobel 算子 
+
+Sobel 算子是一种基于梯度的边缘检测算子，它通过计算图像在水平和垂直方向上的梯度来检测边缘。
+
+Sobel 算子结合了高斯平滑和微分操作，因此对噪声具有一定的抑制作用。
+
+**Sobel算子原理**：
+
+Sobel 算子使用两个 3x3 的卷积核分别计算图像在水平和垂直方向上的梯度：
+
+- 水平方向的卷积核：
+
+​		
+
+```math
+\begin{bmatrix}
+-1 & 0 & 1 \\
+-2 & 0 & 2 \\
+-1 & 0 & 1
+\end{bmatrix}
+```
+
+
+
+- 垂直方向的卷积核：
+
+```math
+\begin{bmatrix}
+-1 & -2 & -1 \\
+0 & 0 & 0 \\
+1 & 2 & 1
+\end{bmatrix}
+```
+
+
+
+
+
+通过这两个卷积核，可以分别得到图像在水平和垂直方向上的梯度 `Gx` 和 `Gy`。最终的梯度幅值可以通过以下公式计算：
+
+
+
+```math
+G = \sqrt{Gx^2 + Gy^2}
+```
+
+
+
+>  `sobel_x` 检测的是水平方向变化，它的卷积核在计算后，表示的效果是右边像素 - 左边像素，也就是
+>
+> ​		如果右边比左边亮，结果是正数
+>
+> ​		如果左边比右边亮，结果是负数
+>
+> ​		如果左右差不多，结果接近 0
+>
+>  因此，差值越大，代表的是变化程度大，即我们查看他反映的梯度变化图像应该是采用绝对值。
+>
+> 
+>
+> 对于`sobel_y`同理！
+
+
+
+在 OpenCV 中，可以使用 `cv2.Sobel()` 函数来计算图像的梯度。该函数的原型如下：
+
+```
+dst = cv2.Sobel(src, ddepth, dx, dy, ksize=3, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
+```
+
+
+
+**参数说明**
+
+| 参数         | 说明                                      |
+| ------------ | ----------------------------------------- |
+| `src`        | 输入图像，一般是灰度图。                  |
+| `ddepth`     | 输出图像的深度，通常使用 `cv2.CV_64F`     |
+| `dx`         | x 方向上的导数阶数                        |
+| `dy`         | y 方向上的导数阶数                        |
+| `ksize`      | Sobel 核的大小，默认为 `3`                |
+| `scale`      | 缩放因子，默认为 `1`                      |
+| `delta`      | 可选的 delta 值，默认为 `0`               |
+| `borderType` | 边界填充类型，默认为 `cv2.BORDER_DEFAULT` |
+
+> 适合计算 x 或 y 方向的梯度变化。
+
+**返回值**
+
+- sobel_x ：返回反映x方向梯度变化的灰度图，也就是表示图像在 x 方向上的一阶导数结果。
+- sobel_y ：返回反映y方向梯度变化的灰度图，也就是表示图像在 y 方向上的一阶导数结果。
+
+代码示例：
+
+```python
+import cv2
+import numpy as np
+
+img = cv2.imread('./src/Python_demo/image.jpg', 0)
+img = cv2.resize(img, (640, 480))
+
+sobel_x = cv2.Sobel(img, cv2.CV_64F, 1, 0, ksize=3)
+sobel_y = cv2.Sobel(img, cv2.CV_64F, 0, 1, ksize=3)
+
+# x方向梯度绝对值
+sobel_x_abs = cv2.convertScaleAbs(sobel_x)
+
+# y方向梯度绝对值
+sobel_y_abs = cv2.convertScaleAbs(sobel_y)
+
+# 综合梯度幅值
+sobel_combined = np.sqrt(sobel_x ** 2 + sobel_y ** 2)
+
+# 转成 uint8，方便 OpenCV 按普通图像显示
+sobel_combined = np.uint8(sobel_combined)
+
+cv2.imshow('Original', img)
+cv2.imshow('Sobel X Abs', sobel_x_abs)
+cv2.imshow('Sobel Y Abs', sobel_y_abs)
+cv2.imshow('Sobel Combined', sobel_combined)
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+```
+
+
+
+> 说明代码 类型转换：
+>
+> 在计算综合梯度时，代码使用了：sobel_combined = np.sqrt(sobel_x^2 + sobel_y^2)，由于这里进行了平方和开平方运算，得到的 `sobel_combined` 通常是浮点数类型，例如 `float64`。
+>
+> 需要注意的是，`cv2.imshow()` 在显示不同数据类型的图像时，对像素值范围的理解不同：
+>
+> - 对于 `uint8` 图像，OpenCV 按照 `0 ~ 255` 的范围显示；
+> - 对于浮点数图像，OpenCV 通常按照 `0.0 ~ 1.0` 的范围显示。
+>
+> 而 Sobel 计算得到的梯度幅值往往不是 `0.0 ~ 1.0`，而可能是：10.0、50.0、100.0、160等
+>
+> 因此，如果直接将 `sobel_combined` 传入 `cv2.imshow()` 显示，即使像素值只有 `10.0`，也可能已经被当作接近白色处理，导致大量区域显示过亮，从而看不清真实的梯度纹理和边缘变化。
+>
+> 所以需要对结果进行类型转换，将浮点数类型转换为无符号 8 位整数类型，这样OpenCV对像素值的范围就变成了0~255了
+>
+> 
+
+
+
+
+
+
+
+![cv25](image/cv25.png)
 
 
 
@@ -1983,3 +2210,70 @@ cv2.destroyAllWindows()
 
 
 
+
+#### 3. Laplacian 算子
+
+Laplacian 算子是一种二阶微分算子，它通过计算图像的二阶导数来检测边缘。Laplacian 算子对噪声比较敏感，因此通常在使用之前会对图像进行高斯平滑处理。
+
+**Laplacian 算子的原理**
+
+Laplacian 算子使用以下卷积核来计算图像的二阶导数，会同时考虑 x 方向和 y 方向的二阶梯度变化：
+
+```math
+\begin{bmatrix}
+0 & 1 & 0 \\
+1 & 4 & 1 \\
+0 & 1 & 0
+\end{bmatrix}
+```
+
+通过这个卷积核计算后可以得到图像的 Laplacian 值，Laplacian 值较大的区域通常对应于图像的边缘。
+
+$卷积核计算结果等同于 dst = ∂²I/∂x² + ∂²I/∂y²$
+
+在 OpenCV 中，可以使用 `cv2.Laplacian()` 函数来计算图像的 Laplacian 值。
+
+```
+dst = cv2.Laplacian(src, ddepth, ksize=1, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
+```
+
+**参数说明**
+
+| 参数         | 说明                                      |
+| ------------ | ----------------------------------------- |
+| `src`        | 输入图像                                  |
+| `ddepth`     | 输出图像的深度，通常使用 `cv2.CV_64F`     |
+| `ksize`      | Laplacian 核的大小，默认为 `1`            |
+| `scale`      | 缩放因子，默认为 `1`                      |
+| `delta`      | 可选的 `delta` 值，默认为 `0`             |
+| `borderType` | 边界填充类型，默认为 `cv2.BORDER_DEFAULT` |
+
+
+
+**返回值**
+
+- dst：返回反映图像灰度二阶变化的图像，也可以理解为综合检测图像边缘变化的结果图
+
+
+
+> Laplacian 算子计算对噪声敏感，通常先模糊去噪。
+
+代码示例
+
+```python
+import cv2
+import numpy as np
+
+img = cv2.imread('./src/Python_demo/image.jpg', 0)
+img = cv2.resize(img, (640, 480))
+
+
+laplacian = cv2.Laplacian(img, cv2.CV_64F)
+
+cv2.imshow('laplacian', laplacian)
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+```
+
+![cv23](image/cv23.png)
