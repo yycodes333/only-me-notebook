@@ -1,11 +1,15 @@
-```
-		学习资源：
-				https://www.runoob.com/opencv/opencv-image-thresholding.html
-				https://blog.csdn.net/qq_55621259/article/details/125269490
-				https://zhuanlan.zhihu.com/p/459501430
-		
-		
-```
+​		学习资源：
+​				https://www.runoob.com/opencv/opencv-image-thresholding.html
+​				https://blog.csdn.net/qq_55621259/article/details/125269490
+​				https://zhuanlan.zhihu.com/p/459501430
+​				https://hello-david.github.io/archives/696dccb2.html
+
+
+
+
+
+​		
+​		
 
 # 3.4 OpenCV图像处理
 
@@ -1675,7 +1679,7 @@ import numpy as np
 # 读取图像
 img = cv2.imread('./src/Python_demo/image.jpg', 0)
 img = cv2.resize(img,(640,480))
-# 简单阈值处理
+# 自适应阈值处理
 binary = cv2.adaptiveThreshold(
     img,
     255,
@@ -1717,4 +1721,265 @@ cv2.destroyAllWindows()
 
 OpenCV 提供了多种平滑处理的方法，我们这里将详细讲解四种常用的平滑处理技术：均值滤波、高斯滤波、中值滤波和双边滤波。
 
-#### 1. 均值滤波
+在讲解执之前，我们需要对滤波核进行讲解，方便后续滤波原理的理解。
+
+#### 1. 滤波核
+
+滤波核~ksize~也可以理解为一个小窗口，它会在图像上从左到右、从上到下不断滑动，每滑动到一个位置，就会覆盖图像中的一小块区域，然后根据这块区域内的像素值都进行了加权平均运算，计算出中心像素的新值。我们假定滤波核如下：
+
+```math
+\begin{bmatrix}
+1 & 0 & 1 \\
+0 & 1 & 0 \\
+1 & 0 & 1
+\end{bmatrix}
+```
+
+正如下图我们使用下面这个卷积模板进行图像卷积运算，其结果就如动图那样，每个像素值都进行了加权平均运算。
+
+![cv14](image/cv14.gif)
+
+![cv15](image/cv15.gif)
+
+在滤波中，滤波核Ksize对最终结果影响显著，`ksize` 越大，参与平均计算的像素越多，图像会变得越平滑，但是同时，图像也会变得越模糊。
+
+
+
+| 滤波核大小 | 效果                           |
+| ---------- | ------------------------------ |
+| `(3, 3)`   | 平滑程度较弱，细节保留较多     |
+| `(5, 5)`   | 平滑效果更明显，图像轻微模糊   |
+| `(9, 9)`   | 平滑效果很强，但图像会明显模糊 |
+
+
+
+
+
+#### 2. 均值滤波
+
+均值滤波是图像平滑处理中最简单、最常见的方法之一。
+
+它的核心思想是：用当前像素周围邻域像素的平均值，替换当前像素的值。也就是说，均值滤波会让图像中每个像素都参考周围像素的值，从而减小像素之间的突变，使图像变得更加平滑。
+
+均值滤波在去除噪声起到很大作用，但是也会模糊图像的边缘和细节信息，因为图像边缘本身就是灰度变化比较明显的地方，而均值滤波会把这种变化“平均掉”。
+
+在 OpenCV 中，可以使用 `cv2.blur()` 实现均值滤波。
+
+```python
+dst = cv2.blur(src, ksize)
+```
+
+**参数说明**
+
+| 参数 | 说明 |
+|---|---|
+| `src` | 输入图像即可以是灰度图也可以是彩色图。 |
+| `ksize` | 滤波核大小，格式为 `(width, height)` |
+
+**返回值**
+
+- dst：输出图像，即均值滤波后的结果。
+
+> 其中，`ksize` 表示参与平均计算的邻域大小，即在该点周围每个像素的加权值一样！比如（3，3）表示当前像素周围 `3 × 3` 区域计算平均值。
+
+
+
+ 简单代码示例：
+
+```python
+import cv2
+
+# 读取图像
+image = cv2.imread('image.jpg')
+
+# 应用均值滤波
+blurred_image = cv2.blur(image, (5, 5))
+
+# 显示结果
+cv2.imshow('Original Image', image)
+cv2.imshow('Blurred Image', blurred_image)
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+```
+
+![cv13](image/cv13.png)
+
+
+
+> 说明：对输入的灰度图进行滤波很好理解，对于彩色图也是可以进行滤波，原理就是会分别对R、G、B三个通道分别进行滤波，也就是说彩色图像的每个通道就会单独进行平均值计算，最后再组合成一张新的彩色图像。
+
+
+
+#### 3. 高斯滤波
+
+高斯滤波是一种基于高斯函数的平滑处理方法。与均值滤波不同，高斯滤波在计算像素平均值时，会给中心像素赋予更高的权重，而给边缘像素赋予较低的权重。
+
+高斯滤波在去除噪声的同时，能够更好地保留图像的边缘信息。
+
+在 OpenCV 中，可以使用`cv2.GaussianBlur()` 实现高斯滤波。
+
+```
+dst=cv2.GaussianBlur(src，Ksize，Sigma)
+```
+
+**参数说明**
+
+| 参数    | 说明                                            |
+| ------- | ----------------------------------------------- |
+| `src`   | 输入图像即可以是灰度图也可以是彩色图。          |
+| `ksize` | 滤波核大小，格式为 `(width, height)`            |
+| `Sigma` | 高斯核的标准差，如果为0，则根据核大小自动计算。 |
+
+> Sigma：决定高斯函数的平滑程度。值越大，边缘越模糊。
+>
+> **ksize**：决定滤波器的尺寸。值越大，图像越模糊。
+
+**返回值**
+
+- dst：输出图像，即高斯滤波后的结果。
+
+> 相比均值滤波，高斯滤波适用于去除图像中的高斯噪声，并且在保留图像边缘信息方面表现较好。
+
+简单代码示例：
+
+```python
+import cv2
+import numpy as np
+
+# 读取图像
+img = cv2.imread('./src/Python_demo/image.jpg', 0)
+img = cv2.resize(img,(640,480))
+
+# 应用高斯滤波
+blurred_image = cv2.GaussianBlur(img, (5, 5), 0)
+
+
+# 显示结果
+cv2.imshow('Binary Threshold', blurred_image)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+```
+
+![cv16](image/cv16.png)
+
+
+
+#### 4. 中值滤波
+
+中值滤波是一种非线性平滑处理方法。它的原理是将图像中每个像素的值替换为其周围像素的中值，中值滤波在去除椒盐噪声（即图像中随机出现的黑白点）时非常有效，因此通常中值滤波一般处理二值图。
+
+在 OpenCV 中，可以使用`cv2.medianBlur()` 实现中值滤波。
+
+```python
+dst = cv2.medianBlur(src, ksize)
+```
+
+**参数解释**
+
+| 参数    | 说明                         |
+| ------- | ---------------------------- |
+| `src`   | 输入图像一般是二值图。       |
+| `ksize` | 滤波核大小，**必须是奇数**！ |
+
+**返回值**
+
+- dst：输出图像，即中值滤波后的结果。
+
+> 中值滤波适用于去除图像中的椒盐噪声，并且在保留图像边缘信息方面表现较好。
+
+
+
+代码示例：
+
+```python
+import cv2
+import numpy as np
+
+# 读取图像
+img = cv2.imread('./src/Python_demo/image.jpg', 0)
+img = cv2.resize(img,(640,480))
+
+# 应用中值滤波
+blurred_image = cv2.medianBlur(img, 5)
+
+
+# 显示结果
+cv2.imshow('Binary Threshold', blurred_image)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+```
+
+
+
+![cv17](image/cv17.png)
+
+#### 5. 双边滤波
+
+双边滤波是一种非线性的平滑处理方法，它结合了空间邻近度和像素值相似度。
+
+与高斯滤波不同，双边滤波在平滑图像的同时，能够保留图像的边缘信息。这是因为双边滤波不**仅考虑像素之间的空间距离**，**还考虑像素值之间的差异**。
+
+在 OpenCV 中，可以使用` cv2.bilateralFilter()` 实现中值滤波。
+
+```
+cv2.bilateralFilter(src, d, sigmaColor, sigmaSpace[, dst[, borderType]])
+```
+
+
+
+**参数说明**
+
+| 参数 | 说明 |
+|---|---|
+| `src` | 输入图像，可以是灰度图，也可以是彩色图 |
+| `d` | 滤波时每个像素邻域的直径，也就是参与计算的像素范围 |
+| `sigmaColor` | 颜色空间的标准差，用来控制像素值差异对滤波结果的影响 |
+| `sigmaSpace` | 坐标空间的标准差，用来控制像素距离远近对滤波结果的影响 |
+
+**返回值**
+
+- dst：输出图像，即双边滤波后的结果。
+
+
+
+代码示例：
+
+```python
+import cv2
+import numpy as np
+
+# 读取图像
+img = cv2.imread('./src/Python_demo/image.jpg', 0)
+img = cv2.resize(img,(640,480))
+
+# 应用中值滤波
+blurred_image = cv2.bilateralFilter(img, 9, 75, 75)
+
+
+# 显示结果
+cv2.imshow('Binary Threshold', blurred_image)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+```
+
+
+
+![cv19](image/cv19.png)
+
+
+
+
+
+### 3.4.4.6 边缘检测
+
+
+
+
+
+
+
+
+
+
+
