@@ -3929,9 +3929,708 @@ Histogram Similarity: 0.10090451324893199
 
 ### 3.4.4.9 透射变换
 
+透视变换，英文称Perspective Transform ，是一种把图像中**斜着拍到的平面区域拉正**的图像变换方法。
+
+比如把图像中的歪斜的四边形区域校正成规则的矩形区域，例如斜着拍摄一张纸、斜着拍摄一本书、斜着拍摄一张银行卡、斜着拍摄一个屏幕，这些物体在现实中可能是规则矩形，但是由于拍摄角度的影响，在图像中会变成一个歪斜的四边形或者梯形。
+
+因此，透视变换在图像处理发挥很大作用。
+
+为什么会造成透视变形呢？
+
+因为相机具有透视效果导致拍摄方正的物体在图片中呈现斜的状态。
+
+透视效果最典型的特点是：近大远小。也就是说：离相机近的地方，看起来更大；离相机远的地方，看起来更小。所以现实中本来平行的边，拍到图像中可能会出现收
+
+因此，透视变换常用于文档扫描校正、证件照矫正、图像配准、目标区域提取、视觉测量前的图像校正等。
 
 
 
+> 透视变换本身对图像类型没有限制，也就是说，彩色图、灰度图、二值图、掩膜图都可以做透视变换。
+
+
+
+> 对二值图、掩膜图、标签图做透视变换时，插值方式一般建议使用 `cv2.INTER_NEAREST`。
+
+
+
+
+
+
+
+OpenCV 中透视变换主要用到两个函数：`cv2.getPerspectiveTransform()`和`cv2.warpPerspective()`
+
+| 函数                            | 作用                                           |
+| ------------------------------- | ---------------------------------------------- |
+| `cv2.getPerspectiveTransform()` | 根据原图四个点和目标图四个点，计算透视变换矩阵 |
+| `cv2.warpPerspective()`         | 根据透视变换矩阵，对图像执行透视变换           |
+
+> 看到这两个函数作用，你是否会想起，对于之前学习过的仿射变换呢？在仿射变换中，我们进行旋转等操作时候，也是先计算出旋转使用的矩阵，然后使用仿射变换函数cv2.warpAffine（），这里其实操作步骤原理是一样的。
+>
+
+接下来我们对这两个函数作详细讲解。
+
+
+
+```python
+M = cv2.getPerspectiveTransform(src_pts, dst_pts)
+```
+
+**参数说明**
+
+| 参数      | 含义                                          |
+| --------- | --------------------------------------------- |
+| `src_pts` | 原图中的 4 个点，也就是需要拉正区域的四个角点 |
+| `dst_pts` | 目标图中的 4 个点                             |
+
+**返回值**
+
+- M：返回的 3×3 透视变换矩阵。
+
+> 注意：点的坐标格式是 `(x, y)`，不是 `(行, 列)`，这里不是NumPy数组形式！
+>
+> x表示横坐标，向右增大
+>
+> y 表示纵坐标，向下增大
+
+
+
+
+
+```python
+result = cv2.warpPerspective(image, M, (width, height))
+```
+
+
+
+**参数说明**
+
+| 参数              | 含义                                   |
+| ----------------- | -------------------------------------- |
+| `image`           | 输入图像，可以是灰度图、彩色图、二值图 |
+| `M`               | 透视变换矩阵                           |
+| `(width, height)` | 输出图像大小                           |
+| `flags`           | 插值方式                               |
+| `borderValue`     |                                        |
+| `borderMode`      | 边界填充方式                           |
+
+**返回值**
+
+- result：透视变换后的结果图。
+
+
+
+
+
+常见插值方式如下：
+
+| 参数                | 含义       | 特点                   |
+| ------------------- | ---------- | ---------------------- |
+| `cv2.INTER_NEAREST` | 最近邻插值 | 速度快，不产生新灰度值 |
+| `cv2.INTER_LINEAR`  | 双线性插值 | 默认常用，效果较平滑   |
+| `cv2.INTER_CUBIC`   | 三次插值   | 更平滑，但速度更慢     |
+
+> 因为透视变换后，图像中的像素位置会发生变化，新图像中的某些像素值需要通过插值计算得到。
+>
+> - 彩色图、灰度图：常用 cv2.INTER_LINEAR
+> - 二值图、mask、标签图：常用 cv2.INTER_NEAREST
+>
+> 二值图不能使用线性插值方式
+>
+> ​	原因：二值图或掩膜图通常只有 0 和 255，如果使用线性插值，边缘可能会出现 1、2、128 等中间灰度值，导致结果不再是严格的二值图。
+
+
+
+
+
+
+
+
+
+borderMode` 表示当变换后的某些区域超出原图范围时，边界如何填充。
+
+常见参数如下：
+
+| 参数                   | 含义             |
+| ---------------------- | ---------------- |
+| `cv2.BORDER_CONSTANT`  | 使用固定值填充   |
+| `cv2.BORDER_REPLICATE` | 复制边缘像素填充 |
+
+常用的是：
+
+```python
+borderMode=cv2.BORDER_CONSTANT
+```
+
+表示使用指定颜色填充空白区域。
+
+---
+
+### 7.3 borderValue：边界填充值
+
+`borderValue` 表示当 `borderMode=cv2.BORDER_CONSTANT` 时，用什么颜色填充空白区域。
+
+例如彩色图中：
+
+```python
+borderValue=(0, 0, 0)
+```
+
+表示使用黑色填充。
+
+如果是灰度图，可以写：
+
+```python
+borderValue=0
+```
+
+表示使用黑色填充。
+
+也可以写：
+
+```python
+borderValue=255
+```
+
+表示使用白色填充。
+
+---
+
+# 透视变换完整代码示例
+
+下面用一个文档拉正的例子演示透视变换的基本流程。
+
+```python
+import cv2
+import numpy as np
+
+# 1. 读取原图
+image = cv2.imread("document.jpg")
+
+# 2. 原图中的四个点：左上、右上、右下、左下
+src_pts = np.float32([
+    [100, 100],   # 左上
+    [500, 80],    # 右上
+    [520, 700],   # 右下
+    [80, 720]     # 左下
+])
+
+# 3. 设置目标图像大小
+width, height = 400, 600
+
+# 4. 目标图中的四个点：左上、右上、右下、左下
+dst_pts = np.float32([
+    [0, 0],             # 左上
+    [width, 0],         # 右上
+    [width, height],    # 右下
+    [0, height]         # 左下
+])
+
+# 5. 计算透视变换矩阵
+M = cv2.getPerspectiveTransform(src_pts, dst_pts)
+
+# 6. 执行透视变换
+result = cv2.warpPerspective(image, M, (width, height))
+
+# 7. 显示结果
+cv2.imshow("Original", image)
+cv2.imshow("Perspective Result", result)
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+```
+
+---
+
+## 代码说明
+
+```python
+image = cv2.imread("document.jpg")
+```
+
+表示读取原始图像。
+
+---
+
+```python
+src_pts = np.float32([
+    [100, 100],
+    [500, 80],
+    [520, 700],
+    [80, 720]
+])
+```
+
+表示原图中需要拉正区域的四个角点。
+
+这里四个点的顺序是：
+
+```text
+左上
+右上
+右下
+左下
+```
+
+---
+
+```python
+width, height = 400, 600
+```
+
+表示输出图像的宽度和高度。
+
+---
+
+```python
+dst_pts = np.float32([
+    [0, 0],
+    [width, 0],
+    [width, height],
+    [0, height]
+])
+```
+
+表示目标图像中的四个角点。
+
+也就是希望原图中的四边形最终被拉成一个标准矩形。
+
+---
+
+```python
+M = cv2.getPerspectiveTransform(src_pts, dst_pts)
+```
+
+表示根据原图四个点和目标图四个点，计算透视变换矩阵。
+
+---
+
+```python
+result = cv2.warpPerspective(image, M, (width, height))
+```
+
+表示根据透视变换矩阵 `M`，对原图执行透视变换。
+
+注意：
+
+```python
+(width, height)
+```
+
+表示输出图像大小，顺序是：
+
+```text
+宽，高
+```
+
+---
+
+# 点的顺序为什么重要？
+
+透视变换中，点的顺序非常重要。
+
+`src_pts` 和 `dst_pts` 中的点必须一一对应，并且顺序要一致。
+
+一般推荐固定使用下面的顺序：
+
+```text
+左上
+右上
+右下
+左下
+```
+
+例如：
+
+```python
+src_pts = np.float32([
+    [100, 100],   # 左上
+    [500, 80],    # 右上
+    [520, 700],   # 右下
+    [80, 720]     # 左下
+])
+```
+
+对应的目标点也必须是：
+
+```python
+dst_pts = np.float32([
+    [0, 0],             # 左上
+    [width, 0],         # 右上
+    [width, height],    # 右下
+    [0, height]         # 左下
+])
+```
+
+也就是说：
+
+```text
+原图左上点  ->  目标图左上点
+原图右上点  ->  目标图右上点
+原图右下点  ->  目标图右下点
+原图左下点  ->  目标图左下点
+```
+
+如果点的顺序写错，结果可能会出现：
+
+- 图像翻转
+- 图像扭曲
+- 图像交叉拉伸
+- 图像方向错误
+- 透视结果完全错位
+
+例如，如果把右下点和左下点写反，OpenCV 会以为你要把图像交叉变换，结果就会严重变形。
+
+所以透视变换时，一定要保证：
+
+> 原图点和目标点顺序一致。
+
+---
+
+# 输出宽高怎么确定？
+
+在简单示例中，我们可以直接手动指定：
+
+```python
+width, height = 400, 600
+```
+
+但是更稳妥的做法，是根据原图中四边形的边长自动计算输出宽高。
+
+原因是：
+
+> 如果输出宽高比例设置不合理，图像会被拉宽、压扁或变形。
+
+---
+
+## 1. 计算宽度
+
+宽度可以根据原图四边形的上边和下边计算：
+
+```text
+上边长度 = 左上点 到 右上点 的距离
+下边长度 = 左下点 到 右下点 的距离
+```
+
+然后取较大的一个作为输出宽度。
+
+---
+
+## 2. 计算高度
+
+高度可以根据原图四边形的左边和右边计算：
+
+```text
+左边长度 = 左上点 到 左下点 的距离
+右边长度 = 右上点 到 右下点 的距离
+```
+
+然后取较大的一个作为输出高度。
+
+---
+
+## 3. 自动计算宽高示例
+
+```python
+import cv2
+import numpy as np
+
+# 读取原图
+image = cv2.imread("document.jpg")
+
+# 原图四个点：左上、右上、右下、左下
+src_pts = np.float32([
+    [100, 100],
+    [500, 80],
+    [520, 700],
+    [80, 720]
+])
+
+# 分别取出四个点
+tl, tr, br, bl = src_pts
+
+# 计算上边和下边长度
+width_top = np.linalg.norm(tr - tl)
+width_bottom = np.linalg.norm(br - bl)
+
+# 计算左边和右边长度
+height_left = np.linalg.norm(bl - tl)
+height_right = np.linalg.norm(br - tr)
+
+# 输出宽度取上下边较大值
+width = int(max(width_top, width_bottom))
+
+# 输出高度取左右边较大值
+height = int(max(height_left, height_right))
+
+# 目标图四个点
+dst_pts = np.float32([
+    [0, 0],
+    [width, 0],
+    [width, height],
+    [0, height]
+])
+
+# 计算透视变换矩阵
+M = cv2.getPerspectiveTransform(src_pts, dst_pts)
+
+# 执行透视变换
+result = cv2.warpPerspective(image, M, (width, height))
+
+# 显示结果
+cv2.imshow("Original", image)
+cv2.imshow("Perspective Result", result)
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+```
+
+---
+
+## 4. 为什么要自动计算宽高？
+
+假设原图中的纸张比较接近竖版：
+
+```text
+宽度较小，高度较大
+```
+
+如果你强行设置：
+
+```python
+width, height = 800, 300
+```
+
+那么结果就会被拉得很宽，看起来不自然。
+
+如果根据四边长度自动计算：
+
+```python
+width = 上下边较大值
+height = 左右边较大值
+```
+
+输出结果的比例就会更接近原始平面区域。
+
+---
+
+# 透视变换和仿射变换的区别
+
+透视变换和仿射变换都可以改变图像形状，但是它们处理的变换能力不同。
+
+| 变换类型 | 需要点数 | 能处理的形变                 | 常见用途         |
+| -------- | -------- | ---------------------------- | ---------------- |
+| 仿射变换 | 3 个点   | 平移、旋转、缩放、错切       | 简单几何变换     |
+| 透视变换 | 4 个点   | 透视形变、梯形校正、平面拉正 | 文档校正、鸟瞰图 |
+
+简单理解：
+
+```text
+仿射变换：保持平行关系
+透视变换：可以处理近大远小产生的透视关系
+```
+
+例如：
+
+```text
+矩形 -> 平行四边形
+```
+
+这种可以用仿射变换。
+
+但是：
+
+```text
+梯形 -> 矩形
+```
+
+这种通常需要透视变换。
+
+---
+
+# 透视变换常见注意事项
+
+## 1. 必须提供四个点
+
+透视变换需要原图中的四个点和目标图中的四个点。
+
+也就是：
+
+```python
+src_pts = 4 个点
+dst_pts = 4 个点
+```
+
+如果点数不是 4 个，就不能直接使用 `cv2.getPerspectiveTransform()`。
+
+---
+
+## 2. 点的数据类型要使用 float32
+
+OpenCV 中通常要求点坐标使用 `np.float32` 类型。
+
+推荐写法：
+
+```python
+src_pts = np.float32([
+    [100, 100],
+    [500, 80],
+    [520, 700],
+    [80, 720]
+])
+```
+
+不要直接写普通列表传入。
+
+---
+
+## 3. 点的顺序必须一致
+
+推荐顺序：
+
+```text
+左上、右上、右下、左下
+```
+
+原图点和目标点要一一对应。
+
+---
+
+## 4. 输出尺寸顺序是宽高
+
+`cv2.warpPerspective()` 的第三个参数是：
+
+```python
+(width, height)
+```
+
+不是：
+
+```python
+(height, width)
+```
+
+这一点和 `image.shape` 容易混淆。
+
+因为图像的 shape 通常是：
+
+```python
+image.shape = (height, width, channels)
+```
+
+但是 `warpPerspective()` 里面要写：
+
+```python
+(width, height)
+```
+
+---
+
+## 5. 二值图和 mask 建议使用最近邻插值
+
+如果对二值图或 mask 做透视变换，建议写成：
+
+```python
+result = cv2.warpPerspective(
+    mask,
+    M,
+    (width, height),
+    flags=cv2.INTER_NEAREST
+)
+```
+
+这样可以避免边缘出现中间灰度值。
+
+---
+
+# 完整示例：文档透视校正
+
+下面是一个更完整的文档透视校正示例。
+
+```python
+import cv2
+import numpy as np
+
+# 1. 读取图像
+image = cv2.imread("document.jpg")
+
+# 2. 设置原图中纸张的四个角点
+# 顺序：左上、右上、右下、左下
+src_pts = np.float32([
+    [100, 100],
+    [500, 80],
+    [520, 700],
+    [80, 720]
+])
+
+# 3. 取出四个点
+tl, tr, br, bl = src_pts
+
+# 4. 计算目标图像的宽度
+width_top = np.linalg.norm(tr - tl)
+width_bottom = np.linalg.norm(br - bl)
+width = int(max(width_top, width_bottom))
+
+# 5. 计算目标图像的高度
+height_left = np.linalg.norm(bl - tl)
+height_right = np.linalg.norm(br - tr)
+height = int(max(height_left, height_right))
+
+# 6. 设置目标图中的四个角点
+dst_pts = np.float32([
+    [0, 0],
+    [width, 0],
+    [width, height],
+    [0, height]
+])
+
+# 7. 计算透视变换矩阵
+M = cv2.getPerspectiveTransform(src_pts, dst_pts)
+
+# 8. 执行透视变换
+result = cv2.warpPerspective(image, M, (width, height))
+
+# 9. 显示结果
+cv2.imshow("Original", image)
+cv2.imshow("Perspective Result", result)
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+```
+
+---
+
+# 总结
+
+透视变换是一种用于校正图像透视形变的方法。
+
+它常用于把图像中斜着拍摄到的矩形区域，拉正成标准矩形区域。
+
+核心流程是：
+
+```text
+1. 找到原图中的四个角点
+2. 设置目标图中的四个角点
+3. 使用 cv2.getPerspectiveTransform() 计算变换矩阵
+4. 使用 cv2.warpPerspective() 执行透视变换
+```
+
+核心函数：
+
+| 函数                            | 作用                           |
+| ------------------------------- | ------------------------------ |
+| `cv2.getPerspectiveTransform()` | 根据两组四个点计算透视变换矩阵 |
+| `cv2.warpPerspective()`         | 根据透视变换矩阵执行图像变换   |
+
+简单理解：
+
+> `cv2.getPerspectiveTransform()` 负责算规则，`cv2.warpPerspective()` 负责按规则把图像拉正。
+
+一句话总结：
+
+> 透视变换就是把图像中由于拍摄角度导致的歪斜平面区域，重新校正成标准正视图。
+
+```
+```
 
 
 
