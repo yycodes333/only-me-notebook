@@ -1600,3 +1600,123 @@ git commit -m "first commit"
 git push -u origin main
 ```
 
+### 4. 传输大文件
+
+当仓库中需要上传较大的文件，例如 `.pdf`、`.zip`、`.mp4`、`.psd` 等，可以使用 Git LFS 管理。GitHub 普通 Git 文件单个不能超过 `100 MB`，超过后需要使用 Git LFS。
+
+1. 安装并初始化 Git LFS
+
+1. 第一次使用 Git LFS 时，需要先初始化：
+
+```bash
+git lfs install
+```
+
+2. 设置需要 LFS 管理的文件类型
+例如管理所有 PDF 文件：
+
+```bash
+git lfs track "*.pdf"
+```
+
+也可以管理其他类型文件：
+
+```bash
+git lfs track "*.zip"
+git lfs track "*.mp4"
+git lfs track "*.psd"
+```
+
+执行后会生成或修改 .gitattributes 文件，需要把它提交到仓库中：
+
+```bash
+git add .gitattributes
+git commit -m "配置 Git LFS"
+```
+
+3. 添加并提交大文件，之后正常添加文件即可：
+
+```bash
+git add .
+git commit -m "添加大文件"
+git push origin main
+```
+
+4. 查看哪些文件被 Git LFS 管理
+
+
+```bash
+git lfs ls-files
+```
+
+如果能看到对应的大文件，说明这些文件已经交给 Git LFS 管理
+
+> ​	注意：已经提交过的大文件需要迁移，如果大文件已经被普通 Git 提交过，再执行 git lfs track 是不够的。
+> 需要把历史中的大文件转换为 LFS 文件：
+>
+> ```bash
+> git lfs migrate import --include="*.pdf"
+> ```
+>
+> 然后重新推送：
+>
+> ``` bash
+> git push --force-with-lease origin main
+> ```
+>
+> 注意：这个操作会重写提交历史。如果仓库多人协作，执行前需要先和其他人说明。
+
+5. 若之前有过上传大文件经历即本地有gitattributes，那么上传新的大文件只需要以下步骤：
+
+   ```bash
+   git add .
+   git commit -m "添加文件"
+   git push origin main
+   ```
+
+6. 重新 clone 仓库后拉取 LFS 文件，换电脑或重新 clone 仓库后，需要确保已经安装 Git LFS：
+
+```bash
+git lfs install
+```
+
+然后拉取真实的大文件：
+
+```bash
+git lfs pull
+```
+
+
+
+##### 总结
+
+如果第一次配置
+
+```bash
+git lfs install
+git lfs track "*.pdf"
+git add .gitattributes
+git commit -m "配置 Git LFS"
+```
+
+正常上传：
+
+```bash
+git add .
+git commit -m "添加文件"
+git push origin main
+```
+
+查看 LFS 文件：
+
+```bash
+git lfs ls-files
+```
+
+已提交过的大文件迁移：
+
+```bash
+git lfs migrate import --include="*.pdf"
+git push --force-with-lease origin main
+```
+
