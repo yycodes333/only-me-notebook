@@ -1589,6 +1589,8 @@ git push -u origin dev#由于是在该分支第一次操作一定要➕u
 若想要在本地更换上传仓库即，你像上传到github另一个仓库，可以按以下命令操作
 
 ```bash
+#查看当前远程仓库地址
+git remote -v
 # 修改远程仓库地址
 git remote set-url origin "新仓库的ssh"
 
