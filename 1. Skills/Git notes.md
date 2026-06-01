@@ -1586,5 +1586,17 @@ git push -u origin dev#由于是在该分支第一次操作一定要➕u
 
 同理，当后续在这个分支操作时候就可以简写成git push 或者 git push origin dev了。
 
+若想要在本地更换上传仓库即，你像上传到github另一个仓库，可以按以下命令操作
 
+```bash
+# 修改远程仓库地址
+git remote set-url origin "新仓库的ssh"
+
+# 验证修改是否成功
+git remote -v
+# 然后继续推送，和之前一样操作
+git add .
+git commit -m "first commit"
+git push -u origin main
+```
 
