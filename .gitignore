@@ -1,0 +1,21 @@
+# OS/editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Python/runtime cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local environments
+.env
+.venv/
+venv/
+env/
+
+# Local experiment outputs
+outputs/
+runs/
+data/raw/
+data/tmp/
