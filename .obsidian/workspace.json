@@ -1,0 +1,276 @@
+{
+  "main": {
+    "id": "13316a6105a62d84",
+    "type": "split",
+    "children": [
+      {
+        "id": "568e23ce9c28e831",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "6aa2722b8fd5da2b",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "README.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": true,
+                  "unlinkedCollapsed": true
+                }
+              },
+              "icon": "lucide-file",
+              "title": "README"
+            }
+          },
+          {
+            "id": "63d316baf1c5af25",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "docs/04-robotics/4.3 运动学 Kinematics.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "4.3 运动学 Kinematics"
+            }
+          },
+          {
+            "id": "d1ad858913b398d7",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Excalidraw/Drawing 2026-07-10 20.26.47.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "Drawing 2026-07-10 20.26.47.excalidraw"
+            }
+          }
+        ],
+        "currentTab": 2
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "3c83351680b2c9ae",
+    "type": "split",
+    "children": [
+      {
+        "id": "b9ca3badeee6bf25",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "d37aa190e29d3cbb",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "文件列表"
+            }
+          },
+          {
+            "id": "e07177e237bbff5c",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "[\"created\"]",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabeticalReverse"
+              },
+              "icon": "lucide-search",
+              "title": "搜索"
+            }
+          },
+          {
+            "id": "3fdf4b6d81ebe751",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "书签"
+            }
+          }
+        ],
+        "currentTab": 1
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "ce10dd24e0ce1706",
+    "type": "split",
+    "children": [
+      {
+        "id": "021aff7f8335e46a",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "76b0275dd89d53a3",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "docs/04-robotics/4.3 运动学 Kinematics.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "4.3 运动学 Kinematics 的反向链接列表"
+            }
+          },
+          {
+            "id": "69b0fe89ff75b1ec",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "docs/04-robotics/4.3 运动学 Kinematics.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "4.3 运动学 Kinematics 的出链列表"
+            }
+          },
+          {
+            "id": "651698190efdf53b",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "标签"
+            }
+          },
+          {
+            "id": "d46bad72e6501777",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "添加笔记属性"
+            }
+          },
+          {
+            "id": "94aa9580da0ca2d5",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Excalidraw/Drawing 2026-07-10 20.26.47.excalidraw.md",
+                "followCursor": false,
+                "showSearch": true,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Drawing 2026-07-10 20.26.47.excalidraw 的大纲"
+            }
+          },
+          {
+            "id": "055f0c8ef9f3251a",
+            "type": "leaf",
+            "state": {
+              "type": "advanced-tables-toolbar",
+              "state": {},
+              "icon": "spreadsheet",
+              "title": "Advanced Tables"
+            }
+          },
+          {
+            "id": "c78d233bcddcb196",
+            "type": "leaf",
+            "state": {
+              "type": "git-view",
+              "state": {},
+              "icon": "git-pull-request",
+              "title": "Source Control"
+            }
+          }
+        ],
+        "currentTab": 6
+      }
+    ],
+    "direction": "horizontal",
+    "width": 314.5
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:新建白板": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false,
+      "bases:新建数据库": false,
+      "workspaces:管理工作区布局": false,
+      "templater-obsidian:Templater": false,
+      "table-editor-obsidian:Advanced Tables Toolbar": false,
+      "obsidian-excalidraw-plugin:新建绘图文件": false,
+      "obsidian-git:Open Git source control": false
+    }
+  },
+  "active": "d1ad858913b398d7",
+  "lastOpenFiles": [
+    "docs/04-robotics/4.3 运动学 Kinematics.md",
+    "Excalidraw/Drawing 2026-07-10 20.26.47.excalidraw.md",
+    "Excalidraw/Drawing 2026-07-10 20.26.13.excalidraw.md",
+    "Excalidraw",
+    "docs/04-robotics/4.4 速度和静力.md",
+    "docs/04-robotics/4.5 运动规划、检测与执行.md",
+    "#我的新笔记.md",
+    "README.md",
+    "docs/05-ros-moveit2/5.1 ROS.md",
+    "docs/10-piper-integration/10.1 PiPER 硬件与 SDK 控制.md",
+    "docs/README.md",
+    "Templates/概念笔记模板.md",
+    "Templates",
+    "docs/10-piper-integration/10.2 PiPER ROS2 与 MoveIt2 适配.md",
+    "docs/04-robotics/MATLAB仿真练习.pdf",
+    "docs/04-robotics/4.2 数学基础.md",
+    "docs/04-robotics/机器人学导论 .pdf",
+    "docs/05-ros-moveit2/5.2 ROS2.md",
+    "未命名.canvas",
+    "2026-07-10.md",
+    "未命名 1.base",
+    "未命名.base",
+    "docs/04-robotics/线代基础——手写笔记.pdf",
+    "archive/README.md"
+  ]
+}
