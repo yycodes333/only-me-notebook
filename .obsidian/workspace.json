@@ -111,8 +111,7 @@
               "title": "书签"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -246,7 +245,7 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "d1ad858913b398d7",
+  "active": "d37aa190e29d3cbb",
   "lastOpenFiles": [
     "docs/04-robotics/4.3 运动学 Kinematics.md",
     "Excalidraw/Drawing 2026-07-10 20.26.47.excalidraw.md",
